@@ -1,0 +1,41 @@
+POST http://localhost:8080/auth/register
+Content-Type: application/json
+
+{
+    "name": "cica",
+    "email": "cica@gmail.com",
+    "password": "123"
+}
+
+###
+DELETE http://localhost:8080/users/2
+
+###
+GET http://localhost:8080/hello
+
+###
+POST http://localhost:8080/auth/login
+Content-Type: application/json
+
+{
+    "email": "cica@gmail.com",
+    "password": "123"
+}
+
+###
+POST http://localhost:8080/auth/logout
+
+###
+GET http://localhost:8080/auth/validate
+
+###
+POST http://localhost:8080/tasks
+Content-Type: application/json
+
+{
+    "title": "Tarefa 5 Ciça",
+    "description": "Descrição da tarefa 5 Ciça"
+}
+
+###
+GET http://localhost:8080/tasks
