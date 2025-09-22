@@ -140,7 +140,7 @@ public class AuthController {
             Long id = jwtService.extractId(token);
             String name = jwtService.extractName(token);
             if (jwtService.validateToken(token, email, id, name)) {
-                res.put("message", "Token válido para: " + email + " e id: " + id);
+                res.put("message", "Token válido para: name: " + name + " , email: " + email + " e id: " + id);
                 res.put("name", name);
                 res.put("email", email);
                 res.put("id", id);
