@@ -127,21 +127,28 @@ public class AuthController {
 
     // GET /auth/validate → valida o token JWT
     @GetMapping("/validate")
-    public ResponseEntity<String> validateToken(@CookieValue(value = "jwt", defaultValue = "") String token) {
+    public ResponseEntity<Map<String, Object>> validateToken(@CookieValue(value = "jwt", defaultValue = "") String token) {
+        Map<String, Object> res = new HashMap<>();
         if (token.isEmpty()) {
-            return ResponseEntity.status(401).body("Token não encontrado");
+            res.put("message", "Token não encontrado");
+            return ResponseEntity.status(401).body(res);
         }
         
         try {
             String email = jwtService.extractEmail(token);
             Long id = jwtService.extractId(token);
             if (jwtService.validateToken(token, email, id)) {
-                return ResponseEntity.ok("Token válido para: " + email + " e id: " + id);
+                res.put("message", "Token válido para: " + email + " e id: " + id);
+                res.put("name", email);
+                res.put("email", id);
+                return ResponseEntity.ok(res);
             } else {
-                return ResponseEntity.status(401).body("Token inválido");
+                res.put("message", "Token inválido");
+                return ResponseEntity.status(401).body(res);
             }
         } catch (Exception e) {
-            return ResponseEntity.status(401).body("Token inválido");
+            res.put("message", "Token inválido");
+            return ResponseEntity.status(401).body(res);
         }
     }
 }
