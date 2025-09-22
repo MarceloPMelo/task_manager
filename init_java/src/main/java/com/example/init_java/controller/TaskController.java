@@ -15,7 +15,10 @@ import com.example.init_java.repository.UserRepository;
 import com.example.init_java.model.User;
 import com.example.init_java.dto.TaskResponseDto;
 import org.springframework.web.bind.annotation.CrossOrigin;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Optional;
 import java.util.Map;
@@ -79,7 +82,9 @@ public class TaskController {
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getTasks(
-            @CookieValue(value = "jwt", defaultValue = "") String token) {
+            @CookieValue(value = "jwt", defaultValue = "") String token,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
         if (token.isEmpty()) {
             return ResponseEntity.status(401).body(Map.of(
                     "error", "Token não encontrado"));
@@ -87,10 +92,13 @@ public class TaskController {
 
         try {
             Long userId = jwtService.extractId(token);
-            List<Task> tasks = taskRepository.findByUser_Id(userId);
+            
+            // Cria o objeto Pageable para paginação
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Task> tasksPage = taskRepository.findByUser_Id(userId, pageable);
 
             // Mapeia cada Task para TaskResponseDto
-            List<TaskResponseDto> tasksDto = tasks.stream()
+            List<TaskResponseDto> tasksDto = tasksPage.getContent().stream()
                     .map(task -> new TaskResponseDto(
                             task.getId(),
                             task.getTitle(),
@@ -101,7 +109,12 @@ public class TaskController {
 
             Map<String, Object> res = new HashMap<>();
             res.put("tasks", tasksDto);
-            res.put("count", tasksDto.size());
+            res.put("currentPage", tasksPage.getNumber());
+            res.put("totalPages", tasksPage.getTotalPages());
+            res.put("totalElements", tasksPage.getTotalElements());
+            res.put("size", tasksPage.getSize());
+            res.put("hasNext", tasksPage.hasNext());
+            res.put("hasPrevious", tasksPage.hasPrevious());
 
             return ResponseEntity.ok(res);
         } catch (Exception e) {
