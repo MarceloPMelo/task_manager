@@ -49,7 +49,8 @@ public class AuthController {
         // Gera o token JWT com email e id do usuário existente (do banco)
         String email = existingUser.get().getEmail();
         Long id = existingUser.get().getId();
-        String token = jwtService.generateToken(email, id);
+        String name = existingUser.get().getName();
+        String token = jwtService.generateToken(email, id, name);
         
         // Cria cookie com o token
         Cookie cookie = new Cookie("jwt", token);
@@ -137,10 +138,12 @@ public class AuthController {
         try {
             String email = jwtService.extractEmail(token);
             Long id = jwtService.extractId(token);
-            if (jwtService.validateToken(token, email, id)) {
+            String name = jwtService.extractName(token);
+            if (jwtService.validateToken(token, email, id, name)) {
                 res.put("message", "Token válido para: " + email + " e id: " + id);
-                res.put("name", email);
-                res.put("email", id);
+                res.put("name", name);
+                res.put("email", email);
+                res.put("id", id);
                 return ResponseEntity.ok(res);
             } else {
                 res.put("message", "Token inválido");

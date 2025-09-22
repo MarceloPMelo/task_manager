@@ -53,9 +53,11 @@ public class JwtInterceptor implements HandlerInterceptor {
         try {
             String email = jwtService.extractEmail(token);
             Long id = jwtService.extractId(token);
-            if (jwtService.validateToken(token, email, id)) {
+            String name = jwtService.extractName(token);
+            if (jwtService.validateToken(token, email, id, name)) {
                 request.setAttribute("userEmail", email);
                 request.setAttribute("userId", id);
+                request.setAttribute("userName", name);
                 return true;
             }
         } catch (Exception e) {

@@ -26,10 +26,11 @@ public class JwtService {
         return Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String generateToken(String email, Long id) {
+    public String generateToken(String email, Long id, String name) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("id", id);
         claims.put("email", email);
+        claims.put("name", name);
         return createToken(claims);
     }
 
@@ -48,6 +49,10 @@ public class JwtService {
 
     public Long extractId(String token) {
         return extractClaim(token, claims -> claims.get("id", Long.class));
+    }
+
+    public String extractName(String token) {
+        return extractClaim(token, claims -> claims.get("name", String.class));
     }
 
     public Date extractExpiration(String token) {
@@ -71,10 +76,11 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
-    public Boolean validateToken(String token, String email, Long id) {
+    public Boolean validateToken(String token, String email, Long id, String name) {
         final String extractedEmail = extractEmail(token);
         final Long extractedId = extractId(token);
-        return (extractedEmail.equals(email) && extractedId.equals(id) && !isTokenExpired(token));
+        final String extractedName = extractName(token);
+        return (extractedEmail.equals(email) && extractedId.equals(id) && extractedName.equals(name) && !isTokenExpired(token));
     }
 
     // Sobrecarga compatível com JwtInterceptor (valida por email e expiração)
