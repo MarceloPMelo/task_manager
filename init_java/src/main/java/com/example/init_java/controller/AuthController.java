@@ -62,6 +62,8 @@ public class AuthController {
         // Adiciona o cookie na resposta
         response.addCookie(cookie);
         res.put("message", "Login realizado com sucesso");
+        res.put("name", name);
+        res.put("email", email);
         return ResponseEntity.status(200).body(res);
     }
 

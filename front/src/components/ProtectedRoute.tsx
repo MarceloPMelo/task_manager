@@ -10,20 +10,19 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const { setUser, setLoading } = useUser();
+  const { setUser, setLoading, user } = useUser(); // 👈 puxando user também
   
   useEffect(() => {
     const validateToken = async () => {
       try {
         const response = await axios.get("http://localhost:8080/auth/validate", {
-          withCredentials: true, // 👈 necessário para enviar cookies HttpOnly
+          withCredentials: true, // necessário para enviar cookies HttpOnly
         });
 
         const data = await response.data;
         console.log("Dados recebidos da validação:", data);
         
         setUser({ name: data.name, email: data.email });
-        console.log("Usuário definido no contexto:", { name: data.name, email: data.email });
 
         if (response.status === 200) {
           setIsAuthenticated(true);
@@ -38,7 +37,14 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     };
 
     validateToken();
-  }, []);
+  }, [setUser, setLoading]);
+
+  // 👀 Monitorando mudanças no user
+  useEffect(() => {
+    if (user) {
+      console.log("User atualizado no contexto (ProtectedRoute):", user);
+    }
+  }, [user]);
 
   // Enquanto valida → mostrar loading (ou spinner)
   if (isAuthenticated === null) {

@@ -1,0 +1,75 @@
+.user-popover {
+  width: 260px;
+  background: #0b1220; /* deep slate */
+  color: #e2e8f0;
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.45), 0 2px 10px rgba(0,0,0,0.35);
+  backdrop-filter: saturate(120%) blur(6px);
+}
+
+.user-popover-header {
+  padding: 10px 14px;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.3px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0));
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.user-popover-body {
+  padding: 10px 14px;
+  display: grid;
+  gap: 8px;
+}
+
+.user-popover-row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-popover-row .label {
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+.user-popover-row .value {
+  color: #e2e8f0;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.user-popover-footer {
+  padding: 10px 14px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.popover-link {
+  color: #93c5fd;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.popover-link:hover { text-decoration: underline; }
+
+.logout-button {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(248, 113, 113, 0.25); /* red-400 */
+  background: rgba(248, 113, 113, 0.1);
+  color: #fecaca; /* red-200 */
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  border-color: rgba(248, 113, 113, 0.5);
+  background: rgba(248, 113, 113, 0.18);
+} 

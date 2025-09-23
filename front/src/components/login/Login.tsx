@@ -1,37 +1,50 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import './Login.css'
 import axios from "axios";
+import { useUser } from '../../context/UserContext';
+
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const { setUser, user } = useUser();
 
-const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsLoading(true);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
 
-  try {
-    const response = await axios.post(
-      "http://localhost:8080/auth/login",
-      { email, password },
-      { withCredentials: true } // necessário se você usar cookie HttpOnly
-    );
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/auth/login",
+        { email, password },
+        { withCredentials: true }
+      );
 
-    const data = response.data;
-    console.log("Login realizado:", data);
+      const data = response.data;
+      console.log("Login realizado:", data);
+      console.log("User antes(Login): ", user);
 
-  } catch (error: any) {
-    if (error.response) {
-      console.error("Erro no login:", error.response.status, error.response.data);
-    } else {
-      console.error("Erro:", error.message);
+      // Atualiza o contexto
+      setUser({ name: data.name, email: data.email });
+
+    } catch (error: any) {
+      if (error.response) {
+        console.error("Erro no login:", error.response.status, error.response.data);
+      } else {
+        console.error("Erro:", error.message);
+      }
+    } finally {
+      setIsLoading(false);
     }
-  } finally {
-    setIsLoading(false);
-  }
-};
+  };
 
+  // 👀 Monitorar mudanças no user
+  useEffect(() => {
+    if (user) {
+      console.log("User atualizado no contexto(Login):", user);
+    }
+  }, [user]);
 
   return (
     <div className="login-container">
