@@ -35,30 +35,15 @@ const Navbar: React.FC<NavbarProps> = ({ onSearch }) => {
   }
 
   const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    try{
-
-      const response = await axios.post(
-        "http://localhost:8080/auth/logout",
-        {withCredentials : true}
-      )
-      const data = response.data;
-      console.log(data);
-      console.log("User antes(Logout): ", user);
-
-      // Atualiza o contexto
-      setUser({ name: '', email: '' });
-
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Erro no logout:", error.response.status, error.response.data);
-      } else {
-        console.error("Erro no logout:", error.message);
-      }
-    } 
-    
-  }
+    e.preventDefault();
+    try {
+      await axios.post("http://localhost:8080/auth/logout", {}, { withCredentials: true });
+      setUser(null);
+      window.location.href = "/login";
+    } catch (err) {
+      console.error("Erro no logout:", err);
+    }
+  };
 
   // 👀 Monitorar mudanças no user
     useEffect(() => {

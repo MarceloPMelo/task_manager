@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import './Login.css'
 import axios from "axios";
 import { useUser } from '../../context/UserContext';
+import { useNavigate } from 'react-router-dom'
 
 
 const Login = () => {
@@ -9,10 +10,13 @@ const Login = () => {
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const { setUser, user } = useUser();
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
+  const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setFeedback(null);
 
     try {
       const response = await axios.post(
@@ -28,16 +32,31 @@ const Login = () => {
       // Atualiza o contexto
       setUser({ name: data.name, email: data.email });
 
+      // Feedback de sucesso
+      setFeedback({ type: 'success', message: data.message || 'Login realizado com sucesso' });
+
+      // Redireciona para Home
+      navigate('/');
+
     } catch (error: any) {
       if (error.response) {
         console.error("Erro no login:", error.response.status, error.response.data);
+        setFeedback({ type: 'error', message: error.response.data?.message || 'Falha no login' });
       } else {
         console.error("Erro:", error.message);
+        setFeedback({ type: 'error', message: 'Erro de rede. Tente novamente.' });
       }
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Ocultar toast automaticamente após alguns segundos
+  useEffect(() => {
+    if (!feedback) return
+    const t = setTimeout(() => setFeedback(null), 3500)
+    return () => clearTimeout(t)
+  }, [feedback])
 
   // 👀 Monitorar mudanças no user
   useEffect(() => {
@@ -48,6 +67,17 @@ const Login = () => {
 
   return (
     <div className="login-container">
+      {!!feedback && (
+        <div className={`login-toast ${feedback.type}`} role="status" aria-live="polite">
+          <div className="toast-icon">
+            {feedback.type === 'success' ? '✔' : '⚠'}
+          </div>
+          <div className="toast-content">
+            <div className="toast-title">{feedback.type === 'success' ? 'Sucesso' : 'Atenção'}</div>
+            <div className="toast-message">{feedback.message}</div>
+          </div>
+        </div>
+      )}
       <div className="login-card">
         <div className="login-header">
           <h1 className="login-title">Bem-vindo de volta</h1>
