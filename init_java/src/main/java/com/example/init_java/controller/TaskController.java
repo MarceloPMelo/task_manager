@@ -70,6 +70,8 @@ public class TaskController {
             taskDto.setTitle(createdTask.getTitle());
             taskDto.setDescription(createdTask.getDescription());
             taskDto.setUserId(createdTask.getUser().getId());
+            taskDto.setDone(createdTask.isDone());
+
 
             res.put("message", "Task criada com sucesso");
             res.put("task", taskDto);
@@ -103,7 +105,8 @@ public class TaskController {
                             task.getId(),
                             task.getTitle(),
                             task.getDescription(),
-                            task.getUser().getId() // pega apenas o ID do usuário
+                            task.getUser().getId(), // pega apenas o ID do usuário
+                            task.isDone()
                     ))
                     .toList();
 
