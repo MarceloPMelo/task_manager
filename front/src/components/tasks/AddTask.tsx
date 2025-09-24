@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import axios from "axios";
 
 interface AddTaskProps {
   onAdd: (title: string, description: string) => void
@@ -9,34 +8,15 @@ const AddTask: React.FC<AddTaskProps> = ({ onAdd }) => {
   const [title, setTitle] = useState("")
   const [description, setDescription] = useState("")
 
-  const handleSubmit = async (e: React.FormEvent) => { // ⬅️ adiciona o async aqui
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
-    try {
-      console.log("Add task attempt. Title: ", title, " description: ", description)
+    // delega para o pai executar a chamada e atualizar a lista
+    onAdd(title, description)
 
-      const response = await axios.post(
-        "http://localhost:8080/tasks",
-        { title, description },
-        { withCredentials: true }
-      );
-      const data = response.data;
-      console.log("Task adicionada: ", data);
-
-      // chama o callback para atualizar a lista no pai
-      onAdd(title, description)
-
-      // limpa os inputs
-      setTitle("")
-      setDescription("")
-
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Erro ao adicionar task:", error.response.status, error.response.data);
-      } else {
-        console.error("Erro:", error.message);
-      }
-    }
+    // limpa os inputs
+    setTitle("")
+    setDescription("")
   }
 
   return (

@@ -28,6 +28,7 @@ const HomePage = () => {
         { withCredentials: true }
       );
       setTasks(prev => [...prev, res.data.task]);
+      console.log("[Home] Task adicionada:", res.data.task);
     } catch (err) {
       console.error("Erro ao adicionar tarefa", err);
     }

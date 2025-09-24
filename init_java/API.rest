@@ -18,7 +18,7 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "email": "cica@gmail.com",
+    "email": "malu@gmail.com",
     "password": "123"
 }
 
@@ -33,9 +33,9 @@ POST http://localhost:8080/tasks
 Content-Type: application/json
 
 {
-    "title": "Tarefa 21 de Ciça",
-    "description": "Descrição da tarefa 21 de Ciça",
-    "done": true
+    "title": "Tarefa 2 de Malu",
+    "description": "Descrição da tarefa 2 de malu",
+    "done": false
 }
 
 ###
