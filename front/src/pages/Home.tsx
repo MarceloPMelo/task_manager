@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
-import AddTask from '../components/tasks/AddTask';
-import TaskCard from '../components/tasks/TaskCard'; // importar o novo componente
 import axios from "axios";
 import {Header}   from "../components/Header";
-
-interface Task {
-  id: number;
-  title: string;
-  description: string;
-  done: boolean;
-}
+import { TaskCard } from "@/components/TaskCard";
+import type { Task } from "@/components/TaskCard";
+import { TaskForm } from "@/components/TaskForm";
+import { toast } from "@/hooks/use-toast";
 
 const HomePage = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
+  
 
   useEffect(() => {
     axios.get("http://localhost:8080/tasks", { withCredentials: true })
@@ -20,7 +16,7 @@ const HomePage = () => {
       .catch(err => console.error(err));
   }, []);
 
-  const handleAddTask = async (title: string, description: string) => {
+  const handleAddTask = async ({ title, description }: { title: string; description: string }) => {
     try {
       const res = await axios.post(
         "http://localhost:8080/tasks",
@@ -34,25 +30,72 @@ const HomePage = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-100">
+
+  const handleToggleComplete = (id: string) => {
+    setTasks(prev =>
+      prev.map(task =>
+        task.id === id ? { ...task, done: !task.done } : task
+      )
+    );
+  };
+
+  const handleDeleteTask = (id: string) => {
+    setTasks(prev => prev.filter(task => task.id !== id));
+    toast({
+      title: "Task removida",
+      description: "A task foi removida com sucesso.",
+    });
+  };
+
+  const completedCount = tasks.filter(task => task.done).length;
+  const totalCount = tasks.length;
+
+   return (
+    <div className="min-h-screen bg-background">
       <Header />
+      
+      <main className="container mx-auto px-4 py-8">
+        <div className="space-y-8">
+          {/* Add Task Form */}
+          <TaskForm onAddTask={handleAddTask} />
 
-      <div className="max-w-3xl mx-auto p-6">
-        <AddTask onAdd={handleAddTask} />
+          {/* Tasks Stats */}
+          {tasks.length > 0 && (
+            <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
+              <span>Total: {totalCount} tasks</span>
+              <span>•</span>
+              <span>Concluídas: {completedCount}</span>
+              <span>•</span>
+              <span>Pendentes: {totalCount - completedCount}</span>
+            </div>
+          )}
 
-        <h2 className="text-2xl font-bold my-6">Minhas Tasks</h2>
-        <div className="flex flex-col gap-4">
-          {tasks.map(task => (
-            <TaskCard
-              key={task.id}
-              title={task.title}
-              description={task.description}
-              done={task.done}
-            />
-          ))}
+          {/* Tasks List */}
+          <div className="space-y-4">
+            {tasks.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground">
+                  <p className="text-lg mb-2">Nenhuma task ainda</p>
+                  <p className="text-sm">
+                    Comece adicionando sua primeira task acima
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="grid gap-4 max-w-2xl mx-auto">
+                {tasks.map(task => (
+                  <TaskCard
+                    key={task.id}
+                    task={task}
+                    onToggleComplete={handleToggleComplete}
+                    onDelete={handleDeleteTask}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };
