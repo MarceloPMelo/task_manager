@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import Navbar from '../components/Navbar/Navbar';
 import AddTask from '../components/tasks/AddTask';
 import TaskCard from '../components/tasks/TaskCard'; // importar o novo componente
 import axios from "axios";
+import {Header}   from "../components/Header";
 
 interface Task {
   id: number;
@@ -36,7 +36,7 @@ const HomePage = () => {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <Navbar />
+      <Header />
 
       <div className="max-w-3xl mx-auto p-6">
         <AddTask onAdd={handleAddTask} />

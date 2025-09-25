@@ -1,4 +1,11 @@
 {
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "types": ["node"]  // permite que TS reconheça módulos do Node, como 'path'
+  },
   "files": [],
   "references": [
     { "path": "./tsconfig.app.json" },
