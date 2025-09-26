@@ -39,12 +39,12 @@ public class AuthController {
 
         // Lança exceção se o usuário não for encontrado
         if (existingUser.isEmpty()) {
-            throw new UserNotFoundException("Email ou usuário inválido");
+            throw new UserNotFoundException();
         }
 
         // Lança exceção se a senha estiver incorreta
         if (!passwordService.matches(user.getPassword(), existingUser.get().getPassword())) {
-            throw new InvalidPasswordException("Email ou senha inválidos");
+            throw new InvalidPasswordException();
         }
 
         // Gera o token JWT
