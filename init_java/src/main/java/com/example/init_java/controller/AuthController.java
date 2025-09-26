@@ -1,9 +1,12 @@
 package com.example.init_java.controller;
 
+import com.example.init_java.exceptions.InvalidPasswordException;
+import com.example.init_java.exceptions.UserNotFoundException;
 import com.example.init_java.model.User;
 import com.example.init_java.repository.UserRepository;
+import com.example.init_java.security.JwtService;
 import com.example.init_java.service.PasswordService;
-import com.example.init_java.service.JwtService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,39 +35,38 @@ public class AuthController {
     // POST /auth/login → autentica um usuário e retorna JWT em cookie
     @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestBody User user, HttpServletResponse response) {
-        Map<String, Object> res = new HashMap<>();
         Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-        
+
+        // Lança exceção se o usuário não for encontrado
         if (existingUser.isEmpty()) {
-            res.put("message", "Usuario não encontrado");
-            return ResponseEntity.status(401).body(res);
+            throw new UserNotFoundException("Email ou usuário inválido");
         }
-        
-        // Verifica se a senha está correta
+
+        // Lança exceção se a senha estiver incorreta
         if (!passwordService.matches(user.getPassword(), existingUser.get().getPassword())) {
-            res.put("message", "Senha incorreta");
-            return ResponseEntity.status(401).body(res);
+            throw new InvalidPasswordException("Email ou senha inválidos");
         }
-        
-        // Gera o token JWT com email e id do usuário existente (do banco)
+
+        // Gera o token JWT
         String email = existingUser.get().getEmail();
         Long id = existingUser.get().getId();
         String name = existingUser.get().getName();
         String token = jwtService.generateToken(email, id, name);
-        
+
         // Cria cookie com o token
         Cookie cookie = new Cookie("jwt", token);
         cookie.setHttpOnly(true); // Protege contra XSS
         cookie.setSecure(false); // true em produção com HTTPS
         cookie.setPath("/");
         cookie.setMaxAge(60 * 60); // 1 hora
-        
-        // Adiciona o cookie na resposta
         response.addCookie(cookie);
+
+        // Retorna resposta de sucesso
+        Map<String, Object> res = new HashMap<>();
         res.put("message", "Login realizado com sucesso");
         res.put("name", name);
         res.put("email", email);
-        return ResponseEntity.status(200).body(res);
+        return ResponseEntity.ok(res);
     }
 
     // POST /auth/logout → remove o cookie JWT
@@ -130,13 +132,14 @@ public class AuthController {
 
     // GET /auth/validate → valida o token JWT
     @GetMapping("/validate")
-    public ResponseEntity<Map<String, Object>> validateToken(@CookieValue(value = "jwt", defaultValue = "") String token) {
+    public ResponseEntity<Map<String, Object>> validateToken(
+            @CookieValue(value = "jwt", defaultValue = "") String token) {
         Map<String, Object> res = new HashMap<>();
         if (token.isEmpty()) {
             res.put("message", "Token não encontrado");
             return ResponseEntity.status(401).body(res);
         }
-        
+
         try {
             String email = jwtService.extractEmail(token);
             Long id = jwtService.extractId(token);

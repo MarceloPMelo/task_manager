@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.beans.factory.annotation.Autowired;
-import com.example.init_java.service.JwtService;
+
 import com.example.init_java.repository.UserRepository;
+import com.example.init_java.security.JwtService;
 import com.example.init_java.model.User;
 import com.example.init_java.dto.TaskResponseDto;
 import org.springframework.web.bind.annotation.CrossOrigin;

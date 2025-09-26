@@ -1,4 +1,4 @@
-package com.example.init_java.service;
+package com.example.init_java.security;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -76,6 +76,7 @@ public class JwtService {
         return extractExpiration(token).before(new Date());
     }
 
+    // Sobrecarga compatível com auth/validate (valida por email, id, name e expiração)
     public Boolean validateToken(String token, String email, Long id, String name) {
         final String extractedEmail = extractEmail(token);
         final Long extractedId = extractId(token);
@@ -83,7 +84,6 @@ public class JwtService {
         return (extractedEmail.equals(email) && extractedId.equals(id) && extractedName.equals(name) && !isTokenExpired(token));
     }
 
-    // Sobrecarga compatível com JwtInterceptor (valida por email e expiração)
     public Boolean validateToken(String token, String email) {
         final String extractedEmail = extractEmail(token);
         return (extractedEmail.equals(email) && !isTokenExpired(token));
