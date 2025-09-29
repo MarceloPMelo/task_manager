@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "../components/Header";
-import { ContactCard } from "@/components/TaskCard";
-import type { Contact } from "@/components/TaskCard";
-import { TaskForm } from "@/components/TaskForm";
+import { ContactCard } from "@/components/ContactCard";
+import type { Contact } from "@/components/ContactCard";
+import { ContactForm } from "@/components/ContactForm";
 import { toast } from "@/hooks/use-toast";
 
 const HomePage = () => {
@@ -76,10 +76,10 @@ const HomePage = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
-          {/* Add Task Form */}
-          <TaskForm onAddContact={handleAddContact} />
+          {/* Add Contact Form */}
+          <ContactForm onAddContact={handleAddContact} />
 
-          {/* Tasks Stats */}
+          {/* Contacts Stats */}
           {contacts.length > 0 && (
             <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
               <span>•</span>
