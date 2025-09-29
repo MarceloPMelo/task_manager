@@ -2,8 +2,8 @@ POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
-    "name": "cica",
-    "email": "cica@gmail.com",
+    "name": "cacau",
+    "email": "cacau@gmail.com",
     "password": "123"
 }
 
@@ -11,7 +11,7 @@ Content-Type: application/json
 GET http://localhost:8080/users
 
 ###
-DELETE http://localhost:8080/users/3444
+DELETE http://localhost:8080/users/5
 
 ###
 GET http://localhost:8080/hello
@@ -21,7 +21,7 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "email": "marcelo@gmail.com",
+    "email": "cacau@gmail.com",
     "password": "123"
 }
 
@@ -32,25 +32,30 @@ POST http://localhost:8080/auth/logout
 GET http://localhost:8080/auth/validate
 
 ###
-POST http://localhost:8080/tasks
+POST http://localhost:8080/contacts
 Content-Type: application/json
 
 {
-    "title": "Tarefa 2 de marcelo",
-    "description": "Descrição da tarefa 2 de marcelo",
-    "done": false
+  "name": "Beatriz Lima",
+  "phone": "+55 71 95555-4444",
+  "email": "beatriz.lima@email.com",
+  "company": "Marketing Plus",
+  "jobTitle": "Especialista em Marketing",
+  "address": "Av. Sete de Setembro, 150 - Salvador/BA"
 }
 
 ###
-GET http://localhost:8080/tasks
+GET http://localhost:8080/contacts?page=0&size=30
 
 ###
-DELETE http://localhost:8080/tasks/23
+DELETE http://localhost:8080/contacts/18
 
 ### 
-PATCH http://localhost:8080/tasks/5
+PATCH http://localhost:8080/contacts/2
 Content-Type: application/json
 
 {
-    "done": false
+    "name": "Maria Oliveira",
+    "jobTitle": "Gerente de Projetos",
+    "macarrao"
 }

@@ -26,9 +26,9 @@ public class User {
     @Size(min = 2, message = "Senha deve ter pelo menos 2 caracteres")
     private String password;
 
-    // Relacionamento com Task
+    // Relacionamento com Contact
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Task> tasks;
+    private List<Contact> contacts  ;
 
     // Construtor padrão
     public User() {}
@@ -46,6 +46,6 @@ public class User {
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
-    public List<Task> getTasks() { return tasks; }
-    public void setTasks(List<Task> tasks) { this.tasks = tasks; }
+    public List<Contact> getContacts() { return contacts; }
+    public void setContacts(List<Contact> contacts) { this.contacts = contacts; }
 }
