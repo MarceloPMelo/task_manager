@@ -6,37 +6,56 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 
-interface TaskFormProps {
-  onAddTask: (task: { title: string; description: string }) => void;
+interface ContactFormProps {
+  onAddContact: (contact: {
+    name: string;
+    phone: string;
+    email: string;
+    company: string;
+    jobTitle: string;
+    address: string;
+  }) => void;
 }
 
-export function TaskForm({ onAddTask }: TaskFormProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+export function TaskForm({ onAddContact }: ContactFormProps) {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [company, setCompany] = useState("");
+  const [jobTitle, setJobTitle] = useState("");
+  const [address, setAddress] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!title.trim()) {
+
+    if (!name.trim()) {
       toast({
         title: "Erro",
-        description: "O título da task é obrigatório",
+        description: "O nome do contato é obrigatório",
         variant: "destructive",
       });
       return;
     }
 
-    onAddTask({
-      title: title.trim(),
-      description: description.trim(),
+    onAddContact({
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      company: company.trim(),
+      jobTitle: jobTitle.trim(),
+      address: address.trim(),
     });
 
-    setTitle("");
-    setDescription("");
-    
+    setName("");
+    setPhone("");
+    setEmail("");
+    setCompany("");
+    setJobTitle("");
+    setAddress("");
+
     toast({
       title: "Sucesso",
-      description: "Task adicionada com sucesso!",
+      description: "Contato adicionado com sucesso!",
     });
   };
 
@@ -53,17 +72,17 @@ export function TaskForm({ onAddTask }: TaskFormProps) {
           <div>
             <Input
               type="text"
-              placeholder="Título da task..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Nome do contato"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="bg-background border-border/50 focus:border-primary"
             />
           </div>
           <div>
             <Textarea
-              placeholder="Descrição da task (opcional)..."
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Phone do contato"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
               className="bg-background border-border/50 focus:border-primary min-h-[100px] resize-none"
             />
           </div>

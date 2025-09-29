@@ -1,80 +1,74 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "../components/Header";
-import { TaskCard } from "@/components/TaskCard";
-import type { Task } from "@/components/TaskCard";
+import { ContactCard } from "@/components/TaskCard";
+import type { Contact } from "@/components/TaskCard";
 import { TaskForm } from "@/components/TaskForm";
 import { toast } from "@/hooks/use-toast";
 
 const HomePage = () => {
-  const [tasks, setTasks] = useState<Task[]>([]);
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
+  interface ContactInput {
+    name: string;
+    phone: string;
+    email: string;
+    company: string;
+    jobTitle: string;
+    address: string;
+  }
 
 
   useEffect(() => {
-    axios.get("http://localhost:8080/tasks", { withCredentials: true })
-      .then(res => setTasks(res.data.tasks))
+    axios.get("http://localhost:8080/contacts", { withCredentials: true })
+      .then(res => setContacts(res.data.contacts))
       .catch(err => console.error(err));
   }, []);
 
-  const handleAddTask = async ({ title, description }: { title: string; description: string }) => {
+
+  const handleAddContact = async (contactData: ContactInput) => {
     try {
       const res = await axios.post(
-        "http://localhost:8080/tasks",
-        { title, description, done: false },
-        { withCredentials: true }
-      );
-      setTasks(prev => [...prev, res.data.task]);
-      console.log("[Home] Task adicionada:", res.data.task);
-
-    } catch (err) {
-      console.error("Erro ao adicionar tarefa", err);
-    }
-  };
-
-
-  const handleToggleComplete = async (id: string) => {
-
-    try {
-      const res = await axios.patch(
-        `http://localhost:8080/tasks/${id}`,
-        { done: !tasks.find(task => task.id === id)?.done },
+        "http://localhost:8080/contacts",
+        contactData,
         { withCredentials: true }
       );
 
-      console.log("[Home] Task alternada:", res.data.task);
-      setTasks(prev =>
-        prev.map(task =>
-          task.id === id ? { ...task, done: !task.done } : task
-        )
-      );
-    } catch (err) {
-      console.error("Erro ao alternar tarefa", err);
-    }
+      // Atualiza a lista de contatos no estado
+      setContacts(prev => [...prev, res.data.contact]);
+      console.log("[Home] Contato adicionado:", res.data.contact);
 
+    } catch (err: any) {
+      if (err.response) {
+        console.error("Erro ao adicionar contato:", err.response.data.message);
+      } else {
+        console.error("Erro ao adicionar contato:", err.message);
+      }
+    }
   };
 
-  const handleDeleteTask = async (id: string) => {
+  
+
+  const handleDeleteContact = async (id: string) => {
 
     try {
       const res = await axios.delete(
-        `http://localhost:8080/tasks/${id}`,
+        `http://localhost:8080/contacts/${id}`,
         { withCredentials: true }
       );
 
-      setTasks(prev => prev.filter(task => task.id !== id));
+      setContacts(prev => prev.filter(contact => contact.id !== id));
       console.log(res);
       toast({
-        title: "Task removida",
-        description: "A task foi removida com sucesso.",
+        title: "Contato removido",
+        description: "O contato foi removido com sucesso.",
       });
 
     } catch (err) {
-      console.error("Erro ao remover tarefa", err);
+      console.error("Erro ao remover contato", err);
     }
-  };
-
-  const completedCount = tasks.filter(task => task.done).length;
-  const totalCount = tasks.length;
+  };;
+  const totalCount = contacts.length;
 
   return (
     <div className="min-h-screen bg-background">
@@ -83,38 +77,35 @@ const HomePage = () => {
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
           {/* Add Task Form */}
-          <TaskForm onAddTask={handleAddTask} />
+          <TaskForm onAddContact={handleAddContact} />
 
           {/* Tasks Stats */}
-          {tasks.length > 0 && (
+          {contacts.length > 0 && (
             <div className="flex items-center justify-center space-x-6 text-sm text-muted-foreground">
-              <span>Total: {totalCount} tasks</span>
               <span>•</span>
-              <span>Concluídas: {completedCount}</span>
+              <span>Total: {totalCount} contatos</span>
               <span>•</span>
-              <span>Pendentes: {totalCount - completedCount}</span>
             </div>
           )}
 
           {/* Tasks List */}
           <div className="space-y-4">
-            {tasks.length === 0 ? (
+            {contacts.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-muted-foreground">
-                  <p className="text-lg mb-2">Nenhuma task ainda</p>
+                  <p className="text-lg mb-2">Nenhum contato ainda</p>
                   <p className="text-sm">
-                    Comece adicionando sua primeira task acima
+                    Comece adicionando seu primeiro contato acima
                   </p>
                 </div>
               </div>
             ) : (
               <div className="grid gap-4 max-w-2xl mx-auto">
-                {tasks.map(task => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onToggleComplete={handleToggleComplete}
-                    onDelete={handleDeleteTask}
+                {contacts.map(contact => (
+                  <ContactCard
+                    key={contact.id}
+                    contact={contact}
+                    onDelete={handleDeleteContact}
                   />
                 ))}
               </div>
