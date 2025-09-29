@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     // ------------------- Unauthorized -------------------
-    @ExceptionHandler({UserNotFoundException.class, InvalidPasswordException.class})
+    @ExceptionHandler({UserNotFoundException.class, InvalidPasswordException.class,  InvalidTokenException.class})
     public ResponseEntity<Map<String,Object>> handleUnauthorized(RuntimeException ex) {
         return buildResponse("UNAUTHORIZED", ex.getMessage(), HttpStatus.UNAUTHORIZED);
     }
