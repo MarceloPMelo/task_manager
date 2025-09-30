@@ -38,6 +38,17 @@ public class Contact {
     // Construtor padrão
     public Contact() {}
 
+    // Construtor completo
+    public Contact(String name, String phone, String email, String company, String jobTitle, String address, User user) {
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.company = company;
+        this.jobTitle = jobTitle;
+        this.address = address;
+        this.user = user;
+    }
+
     // Getters e setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
