@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react'
 import './Login.css'
 import axios from "axios";
-import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { setUser } from '../../store/userSlice';
 
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { setUser, user } = useUser();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const navigate = useNavigate()
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.user);
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +33,7 @@ const Login = () => {
       console.log("User antes(Login): ", user);
 
       // Atualiza o contexto
-      setUser({ name: data.name, email: data.email });
+      dispatch(setUser({ name: data.name, email: data.email }));
 
       // Feedback de sucesso
       setFeedback({ type: 'success', message: data.message || 'Login realizado com sucesso' });

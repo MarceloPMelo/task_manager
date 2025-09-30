@@ -4,11 +4,12 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import ProtectedRoute from "./components/ProtectedRoute";
-import { UserProvider } from "./context/UserContext";
+import { Provider } from 'react-redux';
+import { store } from './store';
 
 function App() {
   return (
-    <UserProvider>
+    <Provider store={store}>
       <Routes>
         <Route
           path="*"
@@ -21,7 +22,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
       </Routes>
-    </UserProvider>
+    </Provider>
   );
 }
 

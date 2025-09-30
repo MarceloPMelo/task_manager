@@ -9,17 +9,20 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "./ui/avatar";
-import { useUser } from "../context/UserContext";
 import axios from "axios";
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { setUser } from '../store/userSlice';
 
 export function Header() {
-  const { user, setUser } = useUser(); // user: { name: string; email: string } | null
+  const user = useAppSelector((state) => state.user);
+
+  const dispatch = useAppDispatch();
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await axios.post("http://localhost:8080/auth/logout", {}, { withCredentials: true });
-      setUser(null);
+      dispatch(setUser({ name: null, email: null }));
       window.location.href = "/login";
     } catch (err) {
       console.error("Erro no logout:", err);
