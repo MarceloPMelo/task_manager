@@ -3,13 +3,9 @@ import axios from "axios";
 import { Header } from "../components/Header";
 import { ContactCard } from "@/components/ContactCard";
 import type { Contact } from "@/components/ContactCard";
-import { ContactForm } from "@/components/ContactForm";
 import { toast } from "@/hooks/use-toast";
 
-const HomePage = () => {
-  const [contacts, setContacts] = useState<Contact[]>([]);
-
-  interface ContactInput {
+export interface ContactInput {
     name: string;
     phone: string;
     email: string;
@@ -18,36 +14,15 @@ const HomePage = () => {
     address: string;
   }
 
+const HomePage = () => {
+  const [contacts, setContacts] = useState<Contact[]>([]);
+
 
   useEffect(() => {
     axios.get("http://localhost:8080/contacts", { withCredentials: true })
       .then(res => setContacts(res.data.contacts))
       .catch(err => console.error(err));
-  }, []);
-
-
-  const handleAddContact = async (contactData: ContactInput) => {
-    try {
-      const res = await axios.post(
-        "http://localhost:8080/contacts",
-        contactData,
-        { withCredentials: true }
-      );
-
-      // Atualiza a lista de contatos no estado
-      setContacts(prev => [...prev, res.data.contact]);
-      console.log("[Home] Contato adicionado:", res.data.contact);
-
-    } catch (err: any) {
-      if (err.response) {
-        console.error("Erro ao adicionar contato:", err.response.data.message);
-      } else {
-        console.error("Erro ao adicionar contato:", err.message);
-      }
-    }
-  };
-
-  
+  }, []);  
 
   const handleDeleteContact = async (id: string) => {
 
@@ -76,8 +51,7 @@ const HomePage = () => {
 
       <main className="container mx-auto px-4 py-8">
         <div className="space-y-8">
-          {/* Add Contact Form */}
-          <ContactForm onAddContact={handleAddContact} />
+          
 
           {/* Contacts Stats */}
           {contacts.length > 0 && (
