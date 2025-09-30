@@ -2,8 +2,8 @@ POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
-    "name": "cacau",
-    "email": "cacau@gmail.com",
+    "name": "malu",
+    "email": "malu@gmail.com",
     "password": "123"
 }
 
@@ -21,7 +21,7 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "email": "cacau@gmail.com",
+    "email": "malu@gmail.com",
     "password": "123"
 }
 
@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/contacts?page=0&size=30
+GET http://localhost:8080/contacts?search=Alice
 
 ###
 DELETE http://localhost:8080/contacts/18

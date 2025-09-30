@@ -4,6 +4,7 @@ import com.example.init_java.model.Contact;
 import com.example.init_java.model.User;
 import com.example.init_java.repository.ContactRepository;
 import com.example.init_java.repository.UserRepository;
+import com.example.init_java.service.PasswordService; // <- importa o serviço
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -18,14 +19,16 @@ public class JavaInitApplication {
     }
 
     @Bean
-    public CommandLineRunner loadData(ContactRepository contactRepo, UserRepository userRepo) {
+    public CommandLineRunner loadData(ContactRepository contactRepo,
+                                      UserRepository userRepo,
+                                      PasswordService passwordService) { // <- injeta o serviço
         return args -> {
             // Cria o usuário com ID 1
             User user = new User();
             user.setId(1L);
-            user.setName("cacau");
-            user.setEmail("cacau@gmail.com");
-            user.setPassword("123");
+            user.setName("malu");
+            user.setEmail("malu@gmail.com");
+            user.setPassword(passwordService.encodePassword("123")); // <- criptografa usando o mesmo serviço
             userRepo.save(user);
 
             // 10 contatos na Encora como Software Engineer

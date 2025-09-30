@@ -18,6 +18,9 @@ import com.example.init_java.exceptions.InvalidTokenException;
 import com.example.init_java.exceptions.BadRequestException;
 
 import com.example.init_java.repository.UserRepository;
+import com.example.init_java.repository.ContactSpecification;
+import org.springframework.data.jpa.domain.Specification; // necessário para usar Specification
+
 import com.example.init_java.security.JwtService;
 
 import jakarta.validation.Valid;
@@ -101,7 +104,10 @@ public class ContactController {
     public ResponseEntity<Map<String, Object>> getContacts(
             @CookieValue(value = "jwt", defaultValue = "") String token,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) List<String> company,
+            @RequestParam(required = false) List<String> jobTitle) {
         if (token.isEmpty()) {
             throw new InvalidTokenException("Token inválido");
         }
@@ -109,11 +115,22 @@ public class ContactController {
         try {
             Long userId = jwtService.extractId(token);
 
-            // Cria o objeto Pageable para paginação
             Pageable pageable = PageRequest.of(page, size);
-            Page<Contact> contactsPage = contactRepository.findByUser_Id(userId, pageable);
 
-            // Mapeia cada Contact para ContactDto
+            Specification<Contact> spec = Specification.where(ContactSpecification.belongsToUser(userId));
+
+            if (search != null && !search.isEmpty()) {
+                spec = spec.and(ContactSpecification.nameContains(search));
+            }
+            if (company != null && !company.isEmpty()) {
+                spec = spec.and(ContactSpecification.companyIn(company));
+            }
+            if (jobTitle != null && !jobTitle.isEmpty()) {
+                spec = spec.and(ContactSpecification.jobTitleIn(jobTitle));
+            }
+
+            Page<Contact> contactsPage = contactRepository.findAll(spec, pageable);
+
             List<ContactDto> contactList = contactsPage.getContent().stream()
                     .map(contact -> new ContactDto(
                             contact.getId(),
@@ -136,9 +153,9 @@ public class ContactController {
             res.put("hasPrevious", contactsPage.hasPrevious());
 
             return ResponseEntity.ok(res);
+
         } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of(
-                    "error", "Token inválido ou expirado"));
+            return ResponseEntity.status(401).body(Map.of("error", "Token inválido ou expirado"));
         }
     }
 
