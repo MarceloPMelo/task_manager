@@ -5,7 +5,16 @@ import { ContactTable } from "@/components/ContactTable";
 import { useAppDispatch, useAppSelector } from "@/store/hooks";
 import { setContacts, deleteContact } from "@/store/contactSlice";
 import { toast } from "@/hooks/use-toast";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Box,
+  TextField,
+  Button,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import Grid from "@mui/material/Grid"; // ✅ correto
+
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
 const pageSize = 10;
 
@@ -72,82 +81,77 @@ const HomePage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <Box minHeight="100vh" bgcolor="background.default">
       <Header />
 
-      <main className="container mx-auto px-4 py-8 space-y-6">
+      <Box maxWidth="lg" mx="auto" px={2} py={4}>
         {/* Filtros e Busca */}
-        <div className="flex flex-col md:flex-row md:items-end md:space-x-4 space-y-2 md:space-y-0 mb-4">
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Buscar por nome</label>
-            <input
-              type="text"
+        <Grid container spacing={2} alignItems="flex-end" mb={3} justifyContent="flex-start">
+          <Grid size={3}>
+            <TextField
+              label="Buscar por nome"
+              fullWidth
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full border rounded p-2"
               placeholder="Nome do contato"
+              variant="outlined"
             />
-          </div>
+            
+          </Grid>
 
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Filtrar por empresa</label>
-            <input
-              type="text"
+          <Grid size={3}>
+            <TextField
+              label="Filtrar por empresa"
+              fullWidth
               value={company.join(",")}
-              onChange={(e) => setCompany(e.target.value.split(",").map(s => s.trim()))}
-              className="w-full border rounded p-2"
+              onChange={(e) => setCompany(e.target.value.split(",").map((s) => s.trim()))}
               placeholder="Ex: Encora, Google, Amazon"
+              variant="outlined"
             />
-          </div>
+          </Grid>
 
-          <div className="flex-1">
-            <label className="block text-sm font-medium mb-1">Filtrar por cargo</label>
-            <input
-              type="text"
+          <Grid size={3}>
+            <TextField
+              label="Filtrar por cargo"
+              fullWidth
               value={jobTitle.join(",")}
-              onChange={(e) => setJobTitle(e.target.value.split(",").map(s => s.trim()))}
-              className="w-full border rounded p-2"
+              onChange={(e) => setJobTitle(e.target.value.split(",").map((s) => s.trim()))}
               placeholder="Ex: Software Engineer, Product Manager"
+              variant="outlined"
             />
-          </div>
+          </Grid>
 
-          <div>
-            <button
+          <Grid >
+            <Button
+              variant="contained"
+              color="primary"
               onClick={handleSearch}
-              className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+              sx={{ height: "100%" }}
             >
               Buscar
-            </button>
-          </div>
-        </div>
+            </Button>
+          </Grid>
+        </Grid>
 
         {/* Paginação */}
         {contacts.length > 0 && (
-          <div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground mb-4">
-            <button
-              onClick={handlePrevPage}
-              disabled={currentPage === 1}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span>
+          <Box display="flex" justifyContent="center" alignItems="center" mb={3}>
+            <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
+              <ChevronLeft />
+            </IconButton>
+            <Typography variant="body2" mx={2}>
               Página {currentPage} de {totalPages}
-            </span>
-            <button
-              onClick={handleNextPage}
-              disabled={currentPage === totalPages}
-              className="p-1 rounded hover:bg-gray-200 disabled:opacity-50"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
-          </div>
+            </Typography>
+            <IconButton onClick={handleNextPage} disabled={currentPage === totalPages}>
+              <ChevronRight />
+            </IconButton>
+          </Box>
         )}
 
         {/* Tabela de contatos */}
         <ContactTable contacts={contacts} onDelete={handleDeleteContact} />
-      </main>
-    </div>
+      </Box>
+    </Box>
   );
 };
 
