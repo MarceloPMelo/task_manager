@@ -1,28 +1,46 @@
 import { User as UserIcon, LogOut, CheckSquare } from "lucide-react";
-import { Button } from "./ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Avatar, AvatarFallback } from "./ui/avatar";
 import axios from "axios";
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { setUser } from '../store/userSlice';
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { setUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
+
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
+import IconButton from "@mui/material/IconButton";
+import Button from "@mui/material/Button";
+import Menu from "@mui/material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Avatar from "@mui/material/Avatar";
+import Divider from "@mui/material/Divider";
+import { useState } from "react";
+import { useTheme } from "@mui/material/styles";
 
 export function Header() {
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const theme = useTheme(); // pega as cores do tema
+
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const handleClickAvatar = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
 
   const handleLogout = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await axios.post("http://localhost:8080/auth/logout", {}, { withCredentials: true });
+      await axios.post(
+        "http://localhost:8080/auth/logout",
+        {},
+        { withCredentials: true }
+      );
       dispatch(setUser({ name: "", email: "" }));
       navigate("/login");
     } catch (err) {
@@ -31,54 +49,73 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-card/80 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+    <AppBar position="sticky" color="transparent" elevation={0}>
+      <Toolbar>
         {/* Logo e navegação */}
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <CheckSquare className="h-8 w-8 text-primary" />
-            <h1 className="text-2xl font-bold text-primary">TaskFlow</h1>
-          </div>
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={() => navigate("/Home")}>Home</Button>
-            <Button variant="outline" onClick={() => navigate("/contacts/register")}>Contact Register</Button>
-          </div>
-        </div>
+        <Box display="flex" alignItems="center" gap={4} flexGrow={1}>
+          {/* Logo */}
+          <Box display="flex" alignItems="center" gap={1}>
+            <CheckSquare
+              style={{ fontSize: 32, color: theme.palette.primary.main }}
+            />
+            <Typography
+              variant="h6"
+              component="h1"
+              color="primary"
+              fontWeight="bold"
+            >
+              ContactFlow
+            </Typography>
+          </Box>
+
+          {/* Navegação */}
+          <Box display="flex" gap={1}>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate("/Home")}
+            >
+              Home
+            </Button>
+            <Button
+              variant="outlined"
+              color="primary"
+              onClick={() => navigate("/contacts/register")}
+            >
+              Contact Register
+            </Button>
+          </Box>
+        </Box>
 
         {/* User Profile */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              className="relative h-10 w-10 rounded-full hover:bg-accent"
-            >
-              <Avatar className="h-9 w-9">
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  <UserIcon className="h-5 w-5" />
-                </AvatarFallback>
-              </Avatar>
-            </Button>
-          </DropdownMenuTrigger>
+        <IconButton onClick={handleClickAvatar}>
+          <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+            <UserIcon color="white" />
+          </Avatar>
+        </IconButton>
 
-          <DropdownMenuContent className="w-56" align="end">
-            <DropdownMenuLabel>
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium">{user?.name || "Usuário"}</p>
-                <p className="text-xs text-muted-foreground">
-                  {user?.email || "email@exemplo.com"}
-                </p>
-              </div>
-            </DropdownMenuLabel>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleCloseMenu}
+        >
+          {/* Label com nome e email */}
+          <Box px={2} py={1}>
+            <Typography variant="body1">{user?.name || "Usuário"}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {user?.email || "email@exemplo.com"}
+            </Typography>
+          </Box>
 
-            <DropdownMenuSeparator />
+          <Divider />
 
-            <DropdownMenuItem className="text-destructive cursor-pointer" onClick={handleLogout}>
-              <LogOut className="mr-2 h-4 w-4" />
-              Logout
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-    </header>
+          {/* Item de logout */}
+          <MenuItem onClick={handleLogout}>
+            <LogOut style={{ marginRight: 8 }} />
+            Logout
+          </MenuItem>
+        </Menu>
+      </Toolbar>
+    </AppBar>
   );
 }
