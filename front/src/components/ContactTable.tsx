@@ -1,5 +1,5 @@
 // src/components/ContactTable.tsx
-import type { Contact } from "./ContactCard";
+import type { Contact } from "../types/Contact";
 import { Button } from "@/components/ui/button";
 
 interface ContactTableProps {

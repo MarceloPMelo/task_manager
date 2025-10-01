@@ -2,9 +2,9 @@
 import axios from "axios";
 import { Header } from "../components/Header";
 import { ContactForm } from "@/components/ContactForm";
-import type { ContactInput } from './Home';
 import { useAppDispatch} from '../store/hooks';
 import { addContact } from '../store/contactSlice';
+import type { ContactInput } from "../types/ContactInput";
 
 const ContactRegister = () => {
   const dispatch = useAppDispatch();
