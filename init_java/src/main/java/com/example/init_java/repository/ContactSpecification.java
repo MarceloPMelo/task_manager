@@ -24,3 +24,10 @@ public class ContactSpecification {
         return (root, query, cb) -> root.get("jobTitle").in(jobTitles);
     }
 }
+
+
+//SELECT * FROM contacts
+//WHERE user_id = :userId
+//AND LOWER(name) LIKE '%joao%'
+//AND company IN ('Google', 'Microsoft')
+//AND job_title IN ('Dev', 'Manager')

@@ -5,6 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 
 import com.example.init_java.model.Contact;
 import com.example.init_java.repository.ContactRepository;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PathVariable;
 
@@ -47,15 +49,14 @@ import java.util.List;
 public class ContactController {
 
     private final ContactRepository contactRepository;
-
-    @Autowired
     private JwtService jwtService;
-
-    @Autowired
     private UserRepository userRepository;
 
-    public ContactController(ContactRepository contactRepository) {
+    public ContactController(ContactRepository contactRepository, UserRepository userRepository,
+            JwtService jwtService) {
         this.contactRepository = contactRepository;
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
     }
 
     // POST /contacts → cria um novo contato vinculado ao usuário do token
@@ -107,56 +108,78 @@ public class ContactController {
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
             @RequestParam(required = false) List<String> company,
-            @RequestParam(required = false) List<String> jobTitle) {
-        if (token.isEmpty()) {
-            throw new InvalidTokenException("Token inválido");
+            @RequestParam(required = false) List<String> jobTitle,
+            @RequestParam(required = false) String sortBy, // <-- sem default
+            @RequestParam(required = false, defaultValue = "asc") String direction,
+            @RequestParam MultiValueMap<String, String> allParams) {
+
+        List<String> uniqueParams = List.of("sortBy", "direction", "search");
+        for (String param : uniqueParams) {
+            if (allParams.getOrDefault(param, List.of()).size() > 1) {
+                throw new BadRequestException("O parâmetro '" + param + "' não pode ser enviado mais de uma vez.");
+            }
         }
 
-        try {
-            Long userId = jwtService.extractId(token);
-
-            Pageable pageable = PageRequest.of(page, size);
-
-            Specification<Contact> spec = Specification.where(ContactSpecification.belongsToUser(userId));
-
-            if (search != null && !search.isEmpty()) {
-                spec = spec.and(ContactSpecification.nameContains(search));
+        // Validação de sortBy permitido
+        if (sortBy != null && !sortBy.isEmpty()) {
+            List<String> allowedSortFields = List.of("id", "name", "email", "company", "jobTitle");
+            if (!allowedSortFields.contains(sortBy)) {
+                throw new BadRequestException("Campo inválido para ordenação: " + sortBy);
             }
-            if (company != null && !company.isEmpty()) {
-                spec = spec.and(ContactSpecification.companyIn(company));
-            }
-            if (jobTitle != null && !jobTitle.isEmpty()) {
-                spec = spec.and(ContactSpecification.jobTitleIn(jobTitle));
-            }
-
-            Page<Contact> contactsPage = contactRepository.findAll(spec, pageable);
-
-            List<ContactDto> contactList = contactsPage.getContent().stream()
-                    .map(contact -> new ContactDto(
-                            contact.getId(),
-                            contact.getName(),
-                            contact.getPhone(),
-                            contact.getEmail(),
-                            contact.getCompany(),
-                            contact.getJobTitle(),
-                            contact.getAddress(),
-                            contact.getUser().getId()))
-                    .toList();
-
-            Map<String, Object> res = new HashMap<>();
-            res.put("contacts", contactList);
-            res.put("currentPage", contactsPage.getNumber());
-            res.put("totalPages", contactsPage.getTotalPages());
-            res.put("totalElements", contactsPage.getTotalElements());
-            res.put("size", contactsPage.getSize());
-            res.put("hasNext", contactsPage.hasNext());
-            res.put("hasPrevious", contactsPage.hasPrevious());
-
-            return ResponseEntity.ok(res);
-
-        } catch (Exception e) {
-            return ResponseEntity.status(401).body(Map.of("error", "Token inválido ou expirado"));
         }
+
+        Long userId = jwtService.extractId(token);
+
+        // Se sortBy for nulo, não aplica ordenação
+        Pageable pageable;
+        if (sortBy != null && !sortBy.isEmpty()) {
+            Sort sort = direction.equalsIgnoreCase("desc")
+                    ? Sort.by(sortBy).descending()
+                    : Sort.by(sortBy).ascending();
+            pageable = PageRequest.of(page, size, sort);
+        } else {
+            pageable = PageRequest.of(page, size); // sem sort
+        }
+
+        Specification<Contact> spec = Specification.where(ContactSpecification.belongsToUser(userId));
+
+        if (search != null && !search.isEmpty()) {
+            spec = spec.and(ContactSpecification.nameContains(search));
+        }
+        if (company != null && !company.isEmpty()) {
+            spec = spec.and(ContactSpecification.companyIn(company));
+        }
+        if (jobTitle != null && !jobTitle.isEmpty()) {
+            spec = spec.and(ContactSpecification.jobTitleIn(jobTitle));
+        }
+
+        Page<Contact> contactsPage = contactRepository.findAll(spec, pageable);
+
+        List<ContactDto> contactList = contactsPage.getContent().stream()
+                .map(contact -> new ContactDto(
+                        contact.getId(),
+                        contact.getName(),
+                        contact.getPhone(),
+                        contact.getEmail(),
+                        contact.getCompany(),
+                        contact.getJobTitle(),
+                        contact.getAddress(),
+                        contact.getUser().getId()))
+                .toList();
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("contacts", contactList);
+        res.put("currentPage", contactsPage.getNumber());
+        res.put("totalPages", contactsPage.getTotalPages());
+        res.put("totalElements", contactsPage.getTotalElements());
+        res.put("size", contactsPage.getSize());
+        res.put("hasNext", contactsPage.hasNext());
+        res.put("hasPrevious", contactsPage.hasPrevious());
+        res.put("sortBy", sortBy);
+        res.put("direction", direction);
+
+        return ResponseEntity.ok(res);
+
     }
 
     @DeleteMapping("/{id}")
