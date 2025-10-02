@@ -12,7 +12,6 @@ import com.example.init_java.repository.ContactRepository;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.example.init_java.exceptions.InvalidTokenException;
 

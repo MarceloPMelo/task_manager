@@ -11,12 +11,27 @@ import {
   Button,
   IconButton,
   Typography,
+  styled,
 } from "@mui/material";
-import Grid from "@mui/material/Grid"; // ✅ correto
-
+import Grid from "@mui/material/Grid";
 import { ChevronLeft, ChevronRight } from "@mui/icons-material";
 
+// ✅ Importando Formik e Yup
+import { Formik, Form, useField } from "formik";
+import * as Yup from "yup";
+import type { SearchInput } from "@/types/SearchInput";
+
 const pageSize = 10;
+type Filters = {
+  companies: string[];
+  jobTitles: string[];
+};
+// ✅ Schema de validação
+const FilterSchema = Yup.object().shape({
+  search: Yup.string().max(50, "Máximo 50 caracteres"),
+  company: Yup.string().max(100, "Máximo 100 caracteres"),
+  jobTitle: Yup.string().max(100, "Máximo 100 caracteres"),
+});
 
 const HomePage = () => {
   const dispatch = useAppDispatch();
@@ -24,21 +39,27 @@ const HomePage = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [filters, setFilters] = useState<Filters>({
+    companies: [],
+    jobTitles: [],
+  });
+  const [selectedCompanies, setSelectedCompanies] = useState<string[]>([]);
+  const [selectedJobTitles, setSelectedJobTitles] = useState<string[]>([]);
 
-  // Campos de filtro
-  const [search, setSearch] = useState("");
-  const [company, setCompany] = useState<string[]>([]);
-  const [jobTitle, setJobTitle] = useState<string[]>([]);
-
-  const fetchContacts = async (page: number) => {
+  const fetchContacts = async (
+    page: number,
+    filters?: SearchInput
+  ) => {
     try {
       const res = await axios.get("http://localhost:8080/contacts", {
         params: {
           page: page - 1,
           size: pageSize,
-          search: search || undefined,
-          company: company.length > 0 ? company : undefined,
-          jobTitle: jobTitle.length > 0 ? jobTitle : undefined,
+          search: filters?.search || undefined,
+          company: filters?.company ? filters.company : undefined,
+          jobTitle: filters?.jobTitle ? filters.jobTitle : undefined,
+          sortBy: filters?.sortBy ? filters.sortBy : undefined,
+          direction: filters?.direction ? filters.direction : undefined,
         },
         withCredentials: true,
       });
@@ -54,13 +75,31 @@ const HomePage = () => {
     fetchContacts(currentPage);
   }, [currentPage]);
 
+  const fetchFilters = async () => {
+    const res = await axios.get("http://localhost:8080/contacts/filters", {
+      withCredentials: true,
+    });
+    setFilters(res.data);
+  };
+
+  useEffect(() => {
+    fetchFilters();
+  }, []);
+
+
   const handleDeleteContact = async (id: string) => {
     try {
-      await axios.delete(`http://localhost:8080/contacts/${id}`, { withCredentials: true });
+      await axios.delete(`http://localhost:8080/contacts/${id}`, {
+        withCredentials: true,
+      });
       dispatch(deleteContact(id));
-      toast({ title: "Contato removido", description: "O contato foi removido com sucesso." });
+      toast({
+        title: "Contato removido",
+        description: "O contato foi removido com sucesso.",
+      });
 
-      if (contacts.length === 1 && currentPage > 1) setCurrentPage(currentPage - 1);
+      if (contacts.length === 1 && currentPage > 1)
+        setCurrentPage(currentPage - 1);
       else fetchContacts(currentPage);
     } catch (err) {
       console.error("Erro ao remover contato", err);
@@ -75,84 +114,125 @@ const HomePage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
-  const handleSearch = () => {
-    setCurrentPage(1); // volta para a primeira página ao buscar
-    fetchContacts(1);
-  };
+  interface MySelectProps {
+    options: string[];
+    value: string[];
+    onChange: (values: string[]) => void;
+    label?: string;
+  }
 
-  return (
-    <Box minHeight="100vh" bgcolor="background.default">
-      <Header />
+  const MySelect: React.FC<MySelectProps> = ({
+    options,
+    value,
+    onChange,
+    label = "Selecionar",
+  }) => {
+    const handleChange = (event: any) => {
+      const {
+        target: { value },
+      } = event;
+      onChange(typeof value === "string" ? value.split(",") : value);
+    };
 
-      <Box maxWidth="lg" mx="auto" px={2} py={4}>
-        {/* Filtros e Busca */}
-        <Grid container spacing={2} alignItems="flex-end" mb={3} justifyContent="flex-start">
-          <Grid size={3}>
-            <TextField
-              label="Buscar por nome"
-              fullWidth
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Nome do contato"
-              variant="outlined"
-            />
-            
-          </Grid>
 
-          <Grid size={3}>
-            <TextField
-              label="Filtrar por empresa"
-              fullWidth
-              value={company.join(",")}
-              onChange={(e) => setCompany(e.target.value.split(",").map((s) => s.trim()))}
-              placeholder="Ex: Encora, Google, Amazon"
-              variant="outlined"
-            />
-          </Grid>
+    return (
+      <Box minHeight="100vh" bgcolor="background.default">
+        <Header />
 
-          <Grid size={3}>
-            <TextField
-              label="Filtrar por cargo"
-              fullWidth
-              value={jobTitle.join(",")}
-              onChange={(e) => setJobTitle(e.target.value.split(",").map((s) => s.trim()))}
-              placeholder="Ex: Software Engineer, Product Manager"
-              variant="outlined"
-            />
-          </Grid>
+        <Box maxWidth="lg" mx="auto" px={2} py={4}>
+          {/* Formulário de busca e filtros com Formik */}
+          <Formik
+            initialValues={{ search: "", company: [], jobTitle: [], sortBy: [], direction: "" }}
+            validationSchema={FilterSchema}
+            onSubmit={(values) => {
+              setCurrentPage(1);
+              fetchContacts(1, values);
+            }}
+          >
+            {({ errors, touched, handleChange, values }) => (
+              <Form>
+                <Grid
+                  container
+                  spacing={2}
+                  alignItems="flex-end"
+                  mb={3}
+                  justifyContent="flex-start"
+                >
+                  <Grid size={4}>
+                    <TextField
+                      name="search"
+                      label="Buscar por nome"
+                      fullWidth
+                      value={values.search}
+                      onChange={handleChange}
+                      placeholder="Nome do contato"
+                      variant="outlined"
+                      error={touched.search && Boolean(errors.search)}
+                      helperText={touched.search && errors.search}
+                    />
+                  </Grid>
 
-          <Grid >
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={handleSearch}
-              sx={{ height: "100%" }}
+                  <Grid size={4}>
+                    <MySelect
+                      label="Empresas"
+                      options={filters.companies}
+                      value={selectedCompanies}
+                      onChange={setSelectedCompanies}
+                    />
+                  </Grid>
+
+                  <Grid size={4} >
+                    <MySelect
+                      label="Cargos"
+                      options={filters.jobTitles}
+                      value={selectedJobTitles}
+                      onChange={setSelectedJobTitles}
+                    />
+                  </Grid>
+
+                  <Grid size={2}>
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      sx={{ height: "100%" }}
+                    >
+                      Buscar
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Form>
+            )}
+          </Formik>
+
+          {/* Paginação */}
+          {contacts.length > 0 && (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              mb={3}
             >
-              Buscar
-            </Button>
-          </Grid>
-        </Grid>
+              <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
+                <ChevronLeft />
+              </IconButton>
+              <Typography variant="body2" mx={2}>
+                Página {currentPage} de {totalPages}
+              </Typography>
+              <IconButton
+                onClick={handleNextPage}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight />
+              </IconButton>
+            </Box>
+          )}
 
-        {/* Paginação */}
-        {contacts.length > 0 && (
-          <Box display="flex" justifyContent="center" alignItems="center" mb={3}>
-            <IconButton onClick={handlePrevPage} disabled={currentPage === 1}>
-              <ChevronLeft />
-            </IconButton>
-            <Typography variant="body2" mx={2}>
-              Página {currentPage} de {totalPages}
-            </Typography>
-            <IconButton onClick={handleNextPage} disabled={currentPage === totalPages}>
-              <ChevronRight />
-            </IconButton>
-          </Box>
-        )}
-
-        {/* Tabela de contatos */}
-        <ContactTable contacts={contacts} onDelete={handleDeleteContact} />
+          {/* Tabela de contatos */}
+          <ContactTable contacts={contacts} onDelete={handleDeleteContact} />
+        </Box>
       </Box>
-    </Box>
-  );
-};
-
+    );
+  };
+}
 export default HomePage;
