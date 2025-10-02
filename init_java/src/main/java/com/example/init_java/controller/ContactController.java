@@ -261,4 +261,13 @@ public class ContactController {
         }
     }
 
+    @GetMapping("/filters")
+    public ResponseEntity<Map<String, Object>> getDistinctFields() {
+        Map<String, Object> res = new HashMap<>();
+        res.put("companies", contactRepository.findDistinctCompanies());
+        res.put("jobTitles", contactRepository.findDistinctJobTitles());
+        return ResponseEntity.status(200).body(res);
+
+    }
+
 }
