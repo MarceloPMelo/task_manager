@@ -1,6 +1,15 @@
 // src/components/ContactTable.tsx
 import type { Contact } from "../types/Contact";
-import { Button } from "@/components/ui/button";
+import {
+  Checkbox,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
+} from "@mui/material";
 
 interface ContactTableProps {
   contacts: Contact[];
@@ -17,41 +26,50 @@ export function ContactTable({ contacts, onDelete }: ContactTableProps) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full table-auto border border-border/50 rounded-md">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="px-4 py-2 text-left">Nome</th>
-            <th className="px-4 py-2 text-left">Email</th>
-            <th className="px-4 py-2 text-left">Telefone</th>
-            <th className="px-4 py-2 text-left">Empresa</th>
-            <th className="px-4 py-2 text-left">Cargo</th>
-            <th className="px-4 py-2 text-left">Endereço</th>
-            <th className="px-4 py-2">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {contacts.map(contact => (
-            <tr key={contact.id} className="border-t border-border/30 hover:bg-gray-50">
-              <td className="px-4 py-2">{contact.name}</td>
-              <td className="px-4 py-2">{contact.email}</td>
-              <td className="px-4 py-2">{contact.phone}</td>
-              <td className="px-4 py-2">{contact.company}</td>
-              <td className="px-4 py-2">{contact.jobTitle}</td>
-              <td className="px-4 py-2">{contact.address}</td>
-              <td className="px-4 py-2">
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => onDelete(contact.id)}
-                >
-                  Deletar
-                </Button>
-              </td>
-            </tr>
+
+    <TableContainer sx={{ height: 500 }} component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow sx={{ backgroundColor: "primary.main", color: "white" }}>
+            <TableCell> <Checkbox /> </TableCell>
+            <TableCell>Name</TableCell>
+            <TableCell>Phone</TableCell>
+            <TableCell>Email</TableCell>
+            <TableCell>Company</TableCell>
+            <TableCell>jobTitle</TableCell>
+            <TableCell>address</TableCell>
+          </TableRow>
+        </TableHead>
+
+
+        <TableBody>
+
+
+          {contacts.length !== 0 && contacts.map((contact, index) => (
+            <TableRow key={index}
+              hover
+              sx={{
+                "&:hover": {
+                  backgroundColor: "#f0f0f0", // ou qualquer cor que você quiser
+                },
+              }}
+            >
+              <TableCell> <Checkbox /></TableCell>
+              <TableCell align="left">{contact.name}</TableCell>
+              <TableCell align="left">{contact.phone}</TableCell>
+              <TableCell align="left">{contact.email}</TableCell>
+              <TableCell align="left">{contact.company}</TableCell>
+              <TableCell align="left">{contact.jobTitle}</TableCell>
+              <TableCell align="left">{contact.address}</TableCell>
+            </TableRow>
           ))}
-        </tbody>
-      </table>
-    </div>
+
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+
   );
 }
+
+
