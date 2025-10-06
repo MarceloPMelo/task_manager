@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "../components/Header";
 import { ContactTable } from "@/components/ContactTable";
-import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import { useDispatch, useSelector } from "react-redux";
+import type {RootState} from "../store/index"
 import { setContacts, deleteContact } from "@/store/contactSlice";
 import { toast } from "@/hooks/use-toast";
 import {
@@ -85,8 +86,8 @@ const MySelect: React.FC<MySelectProps> = ({
 };
 
 const HomePage = () => {
-  const dispatch = useAppDispatch();
-  const contacts = useAppSelector((state) => state.contacts.contacts);
+  const dispatch = useDispatch();
+  const contacts = useSelector((state: RootState) => state.contacts.contacts);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
@@ -190,7 +191,7 @@ const HomePage = () => {
                 mb={3}
                 justifyContent="flex-start"
               >
-                <Grid item xs={12} sm={4}>
+                <Grid >
                   <TextField
                     name="search"
                     label="Buscar por nome"
@@ -224,7 +225,7 @@ const HomePage = () => {
                   />
                 </Grid>
 
-                <Grid item xs={12} sm={2}>
+                <Grid >
                   <Button
                     type="submit"
                     variant="contained"

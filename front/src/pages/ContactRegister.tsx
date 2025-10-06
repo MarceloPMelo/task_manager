@@ -2,12 +2,12 @@
 import axios from "axios";
 import { Header } from "../components/Header";
 import { ContactForm } from "@/components/ContactForm";
-import { useAppDispatch} from '../store/hooks';
+import { useDispatch } from "react-redux";
 import { addContact } from '../store/contactSlice';
 import type { ContactInput } from "../types/ContactInput";
 
 const ContactRegister = () => {
-  const dispatch = useAppDispatch();
+  const dispatch = useDispatch();
 
   const handleAddContact = async (contactData: ContactInput) => {
     try {

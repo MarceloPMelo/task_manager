@@ -2,8 +2,9 @@ import React, { useState, useEffect } from 'react'
 import './Login.css'
 import axios from "axios";
 import { useNavigate } from 'react-router-dom'
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from '../../store/userSlice';
+import type { RootState } from '@/store';
 
 
 const Login = () => {
@@ -13,8 +14,8 @@ const Login = () => {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const navigate = useNavigate()
   
-  const dispatch = useAppDispatch();
-  const user = useAppSelector((state) => state.user);
+  const dispatch = useDispatch();
+  const user = useSelector((state: RootState) => state.user);
   
 
   const handleSubmit = async (e: React.FormEvent) => {

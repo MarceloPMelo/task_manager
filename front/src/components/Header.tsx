@@ -1,6 +1,5 @@
 import { User as UserIcon, LogOut, CheckSquare } from "lucide-react";
 import axios from "axios";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { setUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
 
@@ -16,10 +15,12 @@ import Avatar from "@mui/material/Avatar";
 import Divider from "@mui/material/Divider";
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
+import { useDispatch, useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 export function Header() {
-  const user = useAppSelector((state) => state.user);
-  const dispatch = useAppDispatch();
+  const user = useSelector((state: RootState) => state.user);
+  const dispatch = useDispatch();
   const navigate = useNavigate();
   const theme = useTheme(); // pega as cores do tema
 
@@ -41,7 +42,7 @@ export function Header() {
         {},
         { withCredentials: true }
       );
-      dispatch(setUser({ name: "", email: "" }));
+      dispatch(setUser({ name: null, email: null }));
       navigate("/login");
     } catch (err) {
       console.error("Erro no logout:", err);
