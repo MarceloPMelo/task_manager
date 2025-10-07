@@ -1,16 +1,6 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
-
-export interface Contact {
-  id: string;
-  name: string;
-  phone: string;
-  email: string;
-  company: string;
-  jobTitle: string;
-  address: string;
-  userId: string;
-}
+import type { Contact } from "@/types/Contact";
 
 interface ContactState {
   contacts: Contact[];
