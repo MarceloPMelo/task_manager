@@ -15,6 +15,7 @@ import axios from "axios";
 import { fetchContacts } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";
+import { contactService } from "@/services/contactService";
 
 type Filters = {
   companies: string[];
@@ -58,14 +59,13 @@ export function ContactTable() {
     dispatch(fetchContacts({page: currentPage, filters: searchInput}));
   }, [currentPage]);
 
-  const fetchFilters = async () => {
-    const res = await axios.get("http://localhost:8080/contacts/filters", {
-      withCredentials: true,
-    });
-    setFilters(res.data);
-  };
+ 
 
   useEffect(() => {
+    const fetchFilters = async () => {
+      const filters : Filters = await contactService.getFilters();
+      setFilters({companies: filters.companies, jobTitles: filters.jobTitles});
+    };
     fetchFilters();
   }, []);
 
@@ -197,8 +197,8 @@ export function ContactTable() {
       </Box>
 
       {/* Tabela de contatos e paginação */}
-      <Box flex={1} display="flex" flexDirection="column">
-        <TableContainer sx={{ height: 500 }} component={Paper}>
+      <Box flex={1} display="flex" flexDirection="column" gap={3}>
+        <TableContainer sx={{ height: 540 }} component={Paper}>
           <Table>
             <TableHead>
               <TableRow sx={{ backgroundColor: "primary.main", color: "white" }}>

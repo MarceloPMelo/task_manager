@@ -22,4 +22,13 @@ export const contactService = {
         return res.data; // { contacts, totalPages }
     },
 
+    async getFilters() : Promise<{ companies: string[]; jobTitles: string[] }> {
+        const res = await axios.get(`${BASE_URL}/filters`, {
+            withCredentials: true,
+        });
+        return res.data; // { companies, jobTitles }
+    }
+
+
+
 }
