@@ -11,7 +11,6 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { SearchInput } from "@/types/SearchInput";
-import axios from "axios";
 import { fetchContacts } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";

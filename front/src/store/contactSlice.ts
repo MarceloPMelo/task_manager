@@ -3,6 +3,7 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { Contact } from "@/types/Contact";
 import type { SearchInput } from "@/types/SearchInput";
 import { contactService } from "@/services/contactService";
+import type { ContactInput } from "@/types/ContactInput";
 
 interface ContactState {
   contacts: Contact[],
@@ -34,6 +35,18 @@ export const fetchContacts = createAsyncThunk(
   }
 );
 
+export const addContact = createAsyncThunk(
+  "contacts/addContact",
+  async (contactData: ContactInput, { rejectWithValue }) => {
+    try {
+      const data = await contactService.addContact(contactData);
+      return data;
+    } catch (err: any) {
+      return rejectWithValue("Erro ao adicionar contato ");
+    }
+  }
+);
+
 const contactSlice = createSlice({
   name: "contacts",
   initialState,
@@ -41,7 +54,7 @@ const contactSlice = createSlice({
     setContacts: (state, action: PayloadAction<Contact[]>) => {
       state.contacts = action.payload;
     },
-    addContact: (state, action: PayloadAction<Contact>) => {
+    createContact: (state, action: PayloadAction<Contact>) => {
       state.contacts.push(action.payload);
     },
     updateContact: (state, action: PayloadAction<Contact>) => {
@@ -74,12 +87,15 @@ const contactSlice = createSlice({
       .addCase(fetchContacts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(addContact.fulfilled, (state, action : PayloadAction<Contact>) => {
+        state.contacts.push(action.payload)
+      })
   },
 });
 
 
 
 
-export const { setContacts, addContact, updateContact, deleteContact } = contactSlice.actions;
+export const { setContacts, createContact, updateContact, deleteContact } = contactSlice.actions;
 export default contactSlice.reducer;

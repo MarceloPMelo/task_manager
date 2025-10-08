@@ -1,33 +1,16 @@
 // src/pages/ContactRegister.tsx
-import axios from "axios";
 import { Header } from "../components/Header";
 import { ContactForm } from "@/components/ContactForm";
 import { useDispatch } from "react-redux";
 import { addContact } from '../store/contactSlice';
 import type { ContactInput } from "../types/ContactInput";
+import { type AppDispatch } from "@/store"
 
 const ContactRegister = () => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleAddContact = async (contactData: ContactInput) => {
-    try {
-      const res = await axios.post(
-        "http://localhost:8080/contacts",
-        contactData,
-        { withCredentials: true }
-      );
-
-      // Atualiza a lista de contatos no estado usando addContact
-      dispatch(addContact(res.data.contact));
-      console.log("[ContactRegister] Contato adicionado:", res.data.contact);
-
-    } catch (err: any) {
-      if (err.response) {
-        console.error("Erro ao adicionar contato:", err.response.data.message);
-      } else {
-        console.error("Erro ao adicionar contato:", err.message);
-      }
-    }
+    dispatch(addContact(contactData))
   };
 
   return (

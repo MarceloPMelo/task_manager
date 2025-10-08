@@ -1,6 +1,8 @@
 import axios from "axios";
 import type { Contact } from "@/types/Contact";
 import type { SearchInput } from "@/types/SearchInput";
+import type { ContactInput } from "@/types/ContactInput";
+import type { patchContact } from "@/types/patchContact";
 
 const BASE_URL = "http://localhost:8080/contacts";
 const pageSize = 10;
@@ -27,8 +29,31 @@ export const contactService = {
             withCredentials: true,
         });
         return res.data; // { companies, jobTitles }
+    },
+
+    async removeContact (id: string) {
+        const res = await axios.delete(`${BASE_URL}/${id}`, {
+            withCredentials: true,
+        });
+        return res.data;
+    },
+
+    async addContact(contactData: ContactInput): Promise<Contact> {
+        const res = await axios.post(
+            BASE_URL,
+            contactData,
+            { withCredentials: true }
+        );
+        return res.data.contact;
+    },
+
+    async updateContact(id: string, patchData: patchContact): Promise<Contact> {
+        const res = await axios.put(
+            `${BASE_URL}/${id}`,
+            patchData,
+            { withCredentials: true }
+        );
+        return res.data.contact;
     }
-
-
 
 }

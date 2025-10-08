@@ -45,19 +45,19 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/contacts?sortBy=id&direction=asc
+GET http://localhost:8080/contacts
 
 ###
 DELETE http://localhost:8080/contacts/18
 
 ### 
-PATCH http://localhost:8080/contacts/2
+PATCH http://localhost:8080/contacts/1
 Content-Type: application/json
 
 {
     "name": "Maria Oliveira",
     "jobTitle": "Gerente de Projetos",
-    "macarrao"
+    "address": null
 }
 
 ###
