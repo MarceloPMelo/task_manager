@@ -1,34 +1,20 @@
 // src/components/ContactTable.tsx
-import { useDispatch, useSelector } from "react-redux";
 import {
-  Checkbox,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Box,
-  IconButton,
-  Typography,
-  TextField,
-  Button,
-  FormGroup,
-  FormControlLabel,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem
+  Checkbox, Paper, Table,
+  TableBody, TableCell,
+  TableContainer, TableHead,
+  TableRow, Box, IconButton,
+  Typography, TextField, Button,
+  FormGroup, FormControlLabel,
+  FormControl, InputLabel, Select, MenuItem
 } from "@mui/material";
-import type { RootState } from "@/store";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
-import { setContacts } from "@/store/contactSlice";
 import type { SearchInput } from "@/types/SearchInput";
 import axios from "axios";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-
-const pageSize = 10;
+import { fetchContacts } from "@/store/contactSlice";
+import { type AppDispatch, type RootState } from "@/store"
+import { useDispatch, useSelector } from "react-redux";
 
 type Filters = {
   companies: string[];
@@ -50,11 +36,11 @@ const sortOptions = [
 
 export function ContactTable() {
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const contacts = useSelector((state: RootState) => state.contacts.contacts);
+  const totalPages = useSelector((state: RootState) => state.contacts.totalPages);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [enums, setFilters] = useState<Filters>({
     companies: [],
     jobTitles: [],
@@ -68,31 +54,8 @@ export function ContactTable() {
     direction: null,
   });
 
-
-  const fetchContacts = async (page: number, filters?: SearchInput) => {
-    try {
-      const res = await axios.get("http://localhost:8080/contacts", {
-        params: {
-          page: page - 1,
-          size: pageSize,
-          search: filters?.search || undefined,
-          company: filters?.company?.length ? filters.company : undefined,
-          jobTitle: filters?.jobTitle?.length ? filters.jobTitle : undefined,
-          sortBy: filters?.sortBy || undefined,
-          direction: filters?.direction || undefined,
-        },
-        withCredentials: true,
-      });
-
-      dispatch(setContacts(res.data.contacts));
-      setTotalPages(res.data.totalPages);
-    } catch (err) {
-      console.error("Erro ao buscar contatos:", err);
-    }
-  };
-
   useEffect(() => {
-    fetchContacts(currentPage, searchInput);
+    dispatch(fetchContacts({page: currentPage, filters: searchInput}));
   }, [currentPage]);
 
   const fetchFilters = async () => {
@@ -158,7 +121,7 @@ export function ContactTable() {
         component="form"
         onSubmit={(e) => {
           e.preventDefault();
-          fetchContacts(1, searchInput);
+          dispatch(fetchContacts({page: 1, filters: searchInput}));
           setCurrentPage(1);
         }}
       >
