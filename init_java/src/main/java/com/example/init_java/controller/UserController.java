@@ -1,7 +1,8 @@
 package com.example.init_java.controller;
 
 import com.example.init_java.model.User;
-import com.example.init_java.repository.UserRepository;
+import com.example.init_java.repository.User.UserRepository;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;

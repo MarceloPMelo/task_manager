@@ -1,4 +1,4 @@
-package com.example.init_java.repository;
+package com.example.init_java.repository.Contact;
 
 import com.example.init_java.model.Contact;
 import org.springframework.data.jpa.domain.Specification;

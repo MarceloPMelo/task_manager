@@ -36,7 +36,7 @@ POST http://localhost:8080/contacts
 Content-Type: application/json
 
 {
-  "nae": "Joao abreu",
+  "name": "Joao abreu",
   "phone": "+55 71 95555-4444",
   "email": "joao.abreu@email.com",
   "company": "Marketing Plus",

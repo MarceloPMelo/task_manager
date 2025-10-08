@@ -2,8 +2,8 @@ package com.example.init_java;
 
 import com.example.init_java.model.Contact;
 import com.example.init_java.model.User;
-import com.example.init_java.repository.ContactRepository;
-import com.example.init_java.repository.UserRepository;
+import com.example.init_java.repository.Contact.ContactRepository;
+import com.example.init_java.repository.User.UserRepository;
 import com.example.init_java.service.PasswordService; // <- importa o serviço
 
 import org.springframework.boot.CommandLineRunner;

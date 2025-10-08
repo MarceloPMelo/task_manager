@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 
 import com.example.init_java.model.Contact;
-import com.example.init_java.repository.ContactRepository;
+
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,9 +16,10 @@ import org.springframework.web.bind.annotation.PatchMapping;
 import com.example.init_java.exceptions.InvalidTokenException;
 
 import com.example.init_java.exceptions.BadRequestException;
+import com.example.init_java.repository.Contact.ContactRepository;
+import com.example.init_java.repository.Contact.ContactSpecification;
+import com.example.init_java.repository.User.UserRepository;
 
-import com.example.init_java.repository.UserRepository;
-import com.example.init_java.repository.ContactSpecification;
 import org.springframework.data.jpa.domain.Specification; // necessário para usar Specification
 
 import com.example.init_java.security.JwtService;
