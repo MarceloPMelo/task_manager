@@ -30,7 +30,8 @@ export const fetchContacts = createAsyncThunk(
       const data = await contactService.getAll(page, filters);
       return data;
     } catch (err: any) {
-      return rejectWithValue("Erro ao buscar contatos");
+      console.log("Erro: " + err.message)
+      return rejectWithValue(err.message || "Erro ao buscar contatos");
     }
   }
 );
@@ -42,7 +43,8 @@ export const addContact = createAsyncThunk(
       const data = await contactService.addContact(contactData);
       return data;
     } catch (err: any) {
-      return rejectWithValue("Erro ao adicionar contato ");
+      console.log("Erro: " + err.message)
+      return rejectWithValue(err.message || "Erro ao adicionar contato");
     }
   }
 );

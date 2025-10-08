@@ -36,7 +36,7 @@ POST http://localhost:8080/contacts
 Content-Type: application/json
 
 {
-  "name": "Joao abreu",
+  "nae": "Joao abreu",
   "phone": "+55 71 95555-4444",
   "email": "joao.abreu@email.com",
   "company": "Marketing Plus",
@@ -45,7 +45,7 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/contacts
+GET http://localhost:8080/contacts?sortBy=nme&order=asc&page=1&limit=10
 
 ###
 DELETE http://localhost:8080/contacts/18
@@ -57,7 +57,7 @@ Content-Type: application/json
 {
     "name": "Maria Oliveira",
     "jobTitle": "Gerente de Projetos",
-    "address": null
+    "macarrao"
 }
 
 ###

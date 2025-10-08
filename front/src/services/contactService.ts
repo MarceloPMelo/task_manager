@@ -9,29 +9,33 @@ const pageSize = 10;
 
 export const contactService = {
     async getAll(page: number, filters?: SearchInput) {
-        const res = await axios.get(BASE_URL, {
-            params: {
-                page: page - 1,
-                size: pageSize,
-                search: filters?.search || undefined,
-                company: filters?.company?.length ? filters.company : undefined,
-                jobTitle: filters?.jobTitle?.length ? filters.jobTitle : undefined,
-                sortBy: filters?.sortBy || undefined,
-                direction: filters?.direction || undefined,
-            },
-            withCredentials: true,
-        });
-        return res.data; // { contacts, totalPages }
+        try {
+            const res = await axios.get(BASE_URL, {
+                params: {
+                    page: page - 1,
+                    size: pageSize,
+                    search: filters?.search || undefined,
+                    company: filters?.company?.length ? filters.company : undefined,
+                    jobTitle: filters?.jobTitle?.length ? filters.jobTitle : undefined,
+                    sortBy: filters?.sortBy || undefined,
+                    direction: filters?.direction || undefined,
+                },
+                withCredentials: true,
+            });
+            return res.data; // { contacts, totalPages }
+        } catch (error: any) {
+            throw error.response?.data || { message: "Erro desconhecido", status: 500 };
+        }
     },
 
-    async getFilters() : Promise<{ companies: string[]; jobTitles: string[] }> {
+    async getFilters(): Promise<{ companies: string[]; jobTitles: string[] }> {
         const res = await axios.get(`${BASE_URL}/filters`, {
             withCredentials: true,
         });
         return res.data; // { companies, jobTitles }
     },
 
-    async removeContact (id: string) {
+    async removeContact(id: string) {
         const res = await axios.delete(`${BASE_URL}/${id}`, {
             withCredentials: true,
         });
@@ -39,12 +43,12 @@ export const contactService = {
     },
 
     async addContact(contactData: ContactInput): Promise<Contact> {
-        const res = await axios.post(
-            BASE_URL,
-            contactData,
-            { withCredentials: true }
-        );
-        return res.data.contact;
+        try {
+            const res = await axios.post(BASE_URL, contactData, { withCredentials: true });
+            return res.data.contact;
+        } catch (error: any) {
+            throw error.response?.data || { message: "Erro desconhecido", status: 500 };
+        }
     },
 
     async updateContact(id: string, patchData: patchContact): Promise<Contact> {
