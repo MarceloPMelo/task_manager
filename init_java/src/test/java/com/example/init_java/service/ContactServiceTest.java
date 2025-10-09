@@ -1,0 +1,90 @@
+package com.example.init_java.service;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.example.init_java.dto.ContactDto;
+import com.example.init_java.exceptions.BadRequestException;
+import com.example.init_java.model.Contact;
+import com.example.init_java.model.User;
+import com.example.init_java.repository.Contact.ContactRepository;
+import com.example.init_java.repository.User.UserRepository;
+import com.example.init_java.security.JwtService;
+
+@ExtendWith(MockitoExtension.class)
+class ContactServiceTest {
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private ContactRepository contactRepository;
+
+    @Mock
+    private JwtService jwtService;
+
+    @InjectMocks
+    private ContactService contactService;
+
+    @Test
+    void shouldReturnMessageWhenCreateContactIsSuccessful() {
+        // Arrange
+        String token = "fake-token";
+
+        Contact contact = new Contact();
+        contact.setEmail("test@example.com");
+        contact.setName("Test Contact");
+        contact.setPhone("1234567890");
+        contact.setCompany("Test Company");
+        contact.setJobTitle("Tester");
+
+        User user = new User();
+        user.setId(999L);
+
+        // Mocks
+        when(jwtService.extractId(token)).thenReturn(999L);
+        when(contactRepository.existsByEmail("test@example.com")).thenReturn(false);
+        when(userRepository.findById(999L)).thenReturn(Optional.of(user));
+
+        // Mock do save retornando o contato com ID preenchido
+        Contact savedContact = new Contact();
+        savedContact.setId(1L);
+        savedContact.setEmail(contact.getEmail());
+        savedContact.setName(contact.getName());
+        savedContact.setPhone(contact.getPhone());
+        savedContact.setCompany(contact.getCompany());
+        savedContact.setJobTitle(contact.getJobTitle());
+        savedContact.setUser(user);
+
+        when(contactRepository.save(contact)).thenReturn(savedContact);
+
+        // Act
+        Map<String, Object> result = contactService.createContact(token, contact);
+
+        // Assert
+        assertEquals("Contato criado com sucesso", result.get("message"));
+
+        ContactDto contactDto = (ContactDto) result.get("contact");
+        assertEquals(1L, contactDto.getId());
+        assertEquals("Test Contact", contactDto.getName());
+        assertEquals("test@example.com", contactDto.getEmail());
+        assertEquals("1234567890", contactDto.getPhone());
+        assertEquals("Test Company", contactDto.getCompany());
+        assertEquals("Tester", contactDto.getJobTitle());
+
+        // Verifica se os métodos do repositório foram chamados corretamente
+        verify(jwtService).extractId(token);
+        verify(contactRepository).existsByEmail("test@example.com");
+        verify(userRepository).findById(999L);
+        verify(contactRepository).save(contact);
+    }
+}

@@ -34,21 +34,13 @@ public class ContactService {
     }
 
     public Map<String, Object> createContact(String token, @Valid Contact contact) {
-        if (token.isEmpty()) {
-            throw new InvalidTokenException("Token não encontrado");
-        }
 
         Long userId = jwtService.extractId(token);
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new BadRequestException("Usuário não encontrado");
-        }
-
         if (contactRepository.existsByEmail(contact.getEmail())) {
             throw new BadRequestException("Email já cadastrado");
         }
 
-        contact.setUser(userOpt.get());
+        contact.setUser(userRepository.findById(userId).orElseThrow(() -> new BadRequestException("Usuário não encontrado")));
         Contact createdContact = contactRepository.save(contact);
 
         ContactDto contactDto = toDto(createdContact);
