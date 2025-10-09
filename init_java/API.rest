@@ -36,12 +36,12 @@ POST http://localhost:8080/contacts
 Content-Type: application/json
 
 {
-  "name": "Joao abreu",
-  "phone": "+55 71 95555-4444",
-  "email": "joao.abreu@email.com",
-  "company": "Marketing Plus",
-  "jobTitle": "Especialista em Marketing",
-  "address": "Av. Sete de Setembro, 150 - Salvador/BA"
+  "nae": "Joao abreu",
+  "phoe": "+55 71 95555-4444",
+  "emal": "joao.abreu@email.com",
+  "compay": "Marketing Plus",
+  "jobTtle": "Especialista em Marketing",
+  "addrss": "Av. Sete de Setembro, 150 - Salvador/BA"
 }
 
 ###
@@ -55,10 +55,9 @@ PATCH http://localhost:8080/contacts/1
 Content-Type: application/json
 
 {
-    "name": "Maria Oliveira",
-    "jobTitle": "Gerente de Projetos",
-    "macarrao"
+    "name": "Maria Oliveiraaa",
+    "jobTitle": null
 }
 
 ###
-GET http://localhost:8080/contacts/filters
+GET http://localhost:8080/contacts/filt
