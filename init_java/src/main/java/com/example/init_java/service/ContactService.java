@@ -40,7 +40,8 @@ public class ContactService {
             throw new BadRequestException("Email já cadastrado");
         }
 
-        contact.setUser(userRepository.findById(userId).orElseThrow(() -> new BadRequestException("Usuário não encontrado")));
+        contact.setUser(
+                userRepository.findById(userId).orElseThrow(() -> new BadRequestException("Usuário não encontrado")));
         Contact createdContact = contactRepository.save(contact);
 
         ContactDto contactDto = toDto(createdContact);
@@ -52,53 +53,23 @@ public class ContactService {
     }
 
     public Map<String, Object> getContacts(
-            String token,
-            int page,
-            int size,
-            String search,
-            List<String> company,
-            List<String> jobTitle,
-            String sortBy,
-            String direction,
-            MultiValueMap<String, String> allParams) {
+            String token, int page, int size, String search, List<String> company,
+            List<String> jobTitle, String sortBy, String direction, MultiValueMap<String, String> allParams) {
 
+        // 1. Validação dos parâmetros de entrada
         validateUniqueParams(allParams);
         validateSortBy(sortBy);
 
+        // 2. Preparação dos dados para a consulta
         Long userId = jwtService.extractId(token);
-
         Pageable pageable = buildPageable(page, size, sortBy, direction);
+        Specification<Contact> spec = buildSpecification(userId, search, company, jobTitle);
 
-        Specification<Contact> spec = Specification.where(ContactSpecification.belongsToUser(userId));
-
-        if (search != null && !search.isEmpty()) {
-            spec = spec.and(ContactSpecification.nameContains(search));
-        }
-        if (company != null && !company.isEmpty()) {
-            spec = spec.and(ContactSpecification.companyIn(company));
-        }
-        if (jobTitle != null && !jobTitle.isEmpty()) {
-            spec = spec.and(ContactSpecification.jobTitleIn(jobTitle));
-        }
-
+        // 3. Execução da consulta
         Page<Contact> contactsPage = contactRepository.findAll(spec, pageable);
 
-        List<ContactDto> contactList = contactsPage.getContent().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-
-        Map<String, Object> res = new HashMap<>();
-        res.put("contacts", contactList);
-        res.put("currentPage", contactsPage.getNumber());
-        res.put("totalPages", contactsPage.getTotalPages());
-        res.put("totalElements", contactsPage.getTotalElements());
-        res.put("size", contactsPage.getSize());
-        res.put("hasNext", contactsPage.hasNext());
-        res.put("hasPrevious", contactsPage.hasPrevious());
-        res.put("sortBy", sortBy);
-        res.put("direction", direction);
-
-        return res;
+        // 4. Formatação da resposta final
+        return formatResponse(contactsPage, sortBy, direction);
     }
 
     public Map<String, Object> deleteContact(Long id) {
@@ -121,12 +92,18 @@ public class ContactService {
 
         Contact existingContact = optContact.get();
 
-        if (updates.getName() != null) existingContact.setName(updates.getName());
-        if (updates.getPhone() != null) existingContact.setPhone(updates.getPhone());
-        if (updates.getEmail() != null) existingContact.setEmail(updates.getEmail());
-        if (updates.getCompany() != null) existingContact.setCompany(updates.getCompany());
-        if (updates.getJobTitle() != null) existingContact.setJobTitle(updates.getJobTitle());
-        if (updates.getAddress() != null) existingContact.setAddress(updates.getAddress());
+        if (updates.getName() != null)
+            existingContact.setName(updates.getName());
+        if (updates.getPhone() != null)
+            existingContact.setPhone(updates.getPhone());
+        if (updates.getEmail() != null)
+            existingContact.setEmail(updates.getEmail());
+        if (updates.getCompany() != null)
+            existingContact.setCompany(updates.getCompany());
+        if (updates.getJobTitle() != null)
+            existingContact.setJobTitle(updates.getJobTitle());
+        if (updates.getAddress() != null)
+            existingContact.setAddress(updates.getAddress());
 
         contactRepository.save(existingContact);
 
@@ -146,7 +123,7 @@ public class ContactService {
 
     // ------------------------ Métodos auxiliares ------------------------
 
-    private void validateUniqueParams(MultiValueMap<String, String> allParams) {
+    protected void validateUniqueParams(MultiValueMap<String, String> allParams) {
         List<String> uniqueParams = List.of("sortBy", "direction", "search");
         for (String param : uniqueParams) {
             if (allParams.getOrDefault(param, List.of()).size() > 1) {
@@ -155,7 +132,7 @@ public class ContactService {
         }
     }
 
-    private void validateSortBy(String sortBy) {
+    protected void validateSortBy(String sortBy) {
         if (sortBy != null && !sortBy.isEmpty()) {
             List<String> allowedSortFields = List.of("id", "name", "email", "company", "jobTitle");
             if (!allowedSortFields.contains(sortBy)) {
@@ -164,7 +141,7 @@ public class ContactService {
         }
     }
 
-    private Pageable buildPageable(int page, int size, String sortBy, String direction) {
+    protected Pageable buildPageable(int page, int size, String sortBy, String direction) {
         if (sortBy != null && !sortBy.isEmpty()) {
             Sort sort = direction.equalsIgnoreCase("desc")
                     ? Sort.by(sortBy).descending()
@@ -174,7 +151,7 @@ public class ContactService {
         return PageRequest.of(page, size);
     }
 
-    private ContactDto toDto(Contact contact) {
+    protected ContactDto toDto(Contact contact) {
         return new ContactDto(
                 contact.getId(),
                 contact.getName(),
@@ -184,5 +161,41 @@ public class ContactService {
                 contact.getJobTitle(),
                 contact.getAddress(),
                 contact.getUser().getId());
+    }
+
+    protected Specification<Contact> buildSpecification(Long userId, String search, List<String> company,
+            List<String> jobTitle) {
+        Specification<Contact> spec = Specification.where(ContactSpecification.belongsToUser(userId));
+
+        if (search != null && !search.trim().isEmpty()) {
+            spec = spec.and(ContactSpecification.nameContains(search));
+        }
+        if (company != null && !company.isEmpty()) {
+            spec = spec.and(ContactSpecification.companyIn(company));
+        }
+        if (jobTitle != null && !jobTitle.isEmpty()) {
+            spec = spec.and(ContactSpecification.jobTitleIn(jobTitle));
+        }
+
+        return spec;
+    }
+
+    protected Map<String, Object> formatResponse(Page<Contact> contactsPage, String sortBy, String direction) {
+        List<ContactDto> contactList = contactsPage.getContent().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("contacts", contactList);
+        response.put("currentPage", contactsPage.getNumber());
+        response.put("totalPages", contactsPage.getTotalPages());
+        response.put("totalElements", contactsPage.getTotalElements());
+        response.put("size", contactsPage.getSize());
+        response.put("hasNext", contactsPage.hasNext());
+        response.put("hasPrevious", contactsPage.hasPrevious());
+        response.put("sortBy", sortBy);
+        response.put("direction", direction);
+
+        return response;
     }
 }
