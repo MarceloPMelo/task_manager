@@ -1,6 +1,9 @@
 package com.example.init_java.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 import java.util.Map;
@@ -86,5 +89,56 @@ class ContactServiceTest {
         verify(contactRepository).existsByEmail("test@example.com");
         verify(userRepository).findById(999L);
         verify(contactRepository).save(contact);
+    }
+
+    @Test
+    void shouldThrowBadRequestException_WhenEmailAlreadyExists() {
+        // Arrange
+        String token = "fake-token";
+        Contact contact = new Contact();
+        contact.setEmail("existing@example.com");
+
+        // Configura o mock para simular que o email já existe
+        when(contactRepository.existsByEmail("existing@example.com")).thenReturn(true);
+
+        // Act & Assert
+        // Verifica se a exceção esperada é lançada
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            contactService.createContact(token, contact);
+        });
+
+        // Verifica a mensagem da exceção
+        assertEquals("Email já cadastrado", exception.getMessage());
+
+        // Garante que a lógica parou e não tentou salvar ou buscar o usuário
+        verify(userRepository, never()).findById(anyLong());
+        verify(contactRepository, never()).save(any(Contact.class));
+    }
+
+    @Test
+    void shouldThrowBadRequestException_WhenUserIsNotFound() {
+        // Arrange
+        String token = "fake-token";
+        Long userId = 999L;
+
+        Contact contact = new Contact();
+        contact.setEmail("new@example.com");
+
+        // Configura os mocks
+        when(jwtService.extractId(token)).thenReturn(userId);
+        when(contactRepository.existsByEmail("new@example.com")).thenReturn(false);
+
+        // Simula que o usuário não foi encontrado
+        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        BadRequestException exception = assertThrows(BadRequestException.class, () -> {
+            contactService.createContact(token, contact);
+        });
+
+        assertEquals("Usuário não encontrado", exception.getMessage());
+
+        // Garante que o método de salvar nunca foi chamado
+        verify(contactRepository, never()).save(any(Contact.class));
     }
 }
