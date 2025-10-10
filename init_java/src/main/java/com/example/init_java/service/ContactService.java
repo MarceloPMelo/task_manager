@@ -3,13 +3,11 @@ package com.example.init_java.service;
 import com.example.init_java.dto.ContactDto;
 import com.example.init_java.dto.PatchContactDto;
 import com.example.init_java.exceptions.BadRequestException;
-import com.example.init_java.exceptions.InvalidTokenException;
 import com.example.init_java.model.Contact;
-import com.example.init_java.model.User;
 import com.example.init_java.repository.Contact.ContactRepository;
 import com.example.init_java.repository.Contact.ContactSpecification;
 import com.example.init_java.repository.User.UserRepository;
-import com.example.init_java.security.JwtService;
+
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
@@ -26,12 +24,10 @@ public class ContactService {
 
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
 
-    public ContactService(ContactRepository contactRepository, UserRepository userRepository, JwtService jwtService) {
+    public ContactService(ContactRepository contactRepository, UserRepository userRepository) {
         this.contactRepository = contactRepository;
         this.userRepository = userRepository;
-        this.jwtService = jwtService;
     }
 
     public Map<String, Object> createContact(@Valid Contact contact) {
@@ -126,10 +122,6 @@ public class ContactService {
     }
 
     // ------------------------ Métodos auxiliares ------------------------
-
-    private Long getLoggedUserId() {
-    return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-}
 
     protected void validateUniqueParams(MultiValueMap<String, String> allParams) {
         List<String> uniqueParams = List.of("sortBy", "direction", "search");

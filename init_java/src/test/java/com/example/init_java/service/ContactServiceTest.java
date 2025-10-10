@@ -1,16 +1,12 @@
 package com.example.init_java.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
 
-import java.util.HashMap;
+import static org.mockito.ArgumentMatchers.anyLong;
+
+import static org.mockito.Mockito.*;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -36,6 +32,9 @@ import com.example.init_java.model.User;
 import com.example.init_java.repository.Contact.ContactRepository;
 import com.example.init_java.repository.User.UserRepository;
 import com.example.init_java.security.JwtService;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 
 import org.springframework.data.domain.Sort;
 
@@ -55,13 +54,12 @@ class ContactServiceTest {
     private ContactService contactService;
 
     private final Long FAKE_USER_ID = 99L;
-    private final String FAKE_TOKEN = "fake-jwt-token";
 
+
+    //POST /contacts
     @Test
     void shouldReturnMessageWhenCreateContactIsSuccessful() {
         // Arrange
-        String token = "fake-token";
-
         Contact contact = new Contact();
         contact.setEmail("test@example.com");
         contact.setName("Test Contact");
@@ -70,14 +68,19 @@ class ContactServiceTest {
         contact.setJobTitle("Tester");
 
         User user = new User();
-        user.setId(999L);
+        user.setId(FAKE_USER_ID);
 
-        // Mocks
-        when(jwtService.extractId(token)).thenReturn(999L);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        when(authentication.getPrincipal()).thenReturn(user.getId());
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
+        // Mocks do repositório
         when(contactRepository.existsByEmail("test@example.com")).thenReturn(false);
-        when(userRepository.findById(999L)).thenReturn(Optional.of(user));
+        when(userRepository.findById(FAKE_USER_ID)).thenReturn(Optional.of(user));
 
-        // Mock do save retornando o contato com ID preenchido
         Contact savedContact = new Contact();
         savedContact.setId(1L);
         savedContact.setEmail(contact.getEmail());
@@ -87,10 +90,10 @@ class ContactServiceTest {
         savedContact.setJobTitle(contact.getJobTitle());
         savedContact.setUser(user);
 
-        when(contactRepository.save(contact)).thenReturn(savedContact);
+        when(contactRepository.save(any(Contact.class))).thenReturn(savedContact);
 
         // Act
-        Map<String, Object> result = contactService.createContact(token, contact);
+        Map<String, Object> result = contactService.createContact(contact);
 
         // Assert
         assertEquals("Contato criado com sucesso", result.get("message"));
@@ -104,18 +107,27 @@ class ContactServiceTest {
         assertEquals("Tester", contactDto.getJobTitle());
 
         // Verifica se os métodos do repositório foram chamados corretamente
-        verify(jwtService).extractId(token);
         verify(contactRepository).existsByEmail("test@example.com");
-        verify(userRepository).findById(999L);
-        verify(contactRepository).save(contact);
+        verify(userRepository).findById(FAKE_USER_ID);
+        verify(contactRepository).save(any(Contact.class));
     }
 
     @Test
     void shouldThrowBadRequestException_WhenEmailAlreadyExists() {
         // Arrange
-        String token = "fake-token";
         Contact contact = new Contact();
         contact.setEmail("existing@example.com");
+
+        User user = new User();
+        user.setId(FAKE_USER_ID);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        when(authentication.getPrincipal()).thenReturn(user.getId());
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+        
 
         // Configura o mock para simular que o email já existe
         when(contactRepository.existsByEmail("existing@example.com")).thenReturn(true);
@@ -123,7 +135,7 @@ class ContactServiceTest {
         // Act & Assert
         // Verifica se a exceção esperada é lançada
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            contactService.createContact(token, contact);
+            contactService.createContact(contact);
         });
 
         // Verifica a mensagem da exceção
@@ -137,22 +149,29 @@ class ContactServiceTest {
     @Test
     void shouldThrowBadRequestException_WhenUserIsNotFound() {
         // Arrange
-        String token = "fake-token";
-        Long userId = 999L;
-
         Contact contact = new Contact();
         contact.setEmail("new@example.com");
 
         // Configura os mocks
-        when(jwtService.extractId(token)).thenReturn(userId);
+        User user = new User();
+        user.setId(FAKE_USER_ID);
+
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+
+        when(authentication.getPrincipal()).thenReturn(user.getId());
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
         when(contactRepository.existsByEmail("new@example.com")).thenReturn(false);
 
         // Simula que o usuário não foi encontrado
-        when(userRepository.findById(userId)).thenReturn(Optional.empty());
+        when(userRepository.findById(FAKE_USER_ID)).thenReturn(Optional.empty());
 
         // Act & Assert
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            contactService.createContact(token, contact);
+            contactService.createContact(contact);
         });
 
         assertEquals("Usuário não encontrado", exception.getMessage());
@@ -161,13 +180,15 @@ class ContactServiceTest {
         verify(contactRepository, never()).save(any(Contact.class));
     }
 
+
+
+    //GET /contacts
     @Test
     void shouldReturnContactsSuccessfully() {
         // 🔹 Criamos um spy local (só vale pra este teste)
         ContactService spyService = Mockito.spy(contactService);
 
         // Arrange
-        String token = "fake-token";
         int page = 0;
         int size = 10;
         String search = "John";
@@ -177,21 +198,35 @@ class ContactServiceTest {
         String direction = "asc";
         MultiValueMap<String, String> allParams = new LinkedMultiValueMap<>();
 
+
+        // Configura o mock para simular a extração do id do usuário do Security Context
+    
+        User user = new User();
+        user.setId(FAKE_USER_ID);
+        Authentication authentication = mock(Authentication.class);
+        SecurityContext securityContext = mock(SecurityContext.class);
+        when(authentication.getPrincipal()).thenReturn(user.getId());
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        SecurityContextHolder.setContext(securityContext);
+
         // Mocks de métodos internos
         doNothing().when(spyService).validateUniqueParams(allParams);
         doNothing().when(spyService).validateSortBy(sortBy);
 
-        when(jwtService.extractId(token)).thenReturn(1L);
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, sortBy));
         when(spyService.buildPageable(page, size, sortBy, direction)).thenReturn(pageable);
 
         Specification<Contact> spec = (root, query, cb) -> null;
-        when(spyService.buildSpecification(1L, search, company, jobTitle)).thenReturn(spec);
+        when(spyService.buildSpecification(user.getId(), search, company, jobTitle)).thenReturn(spec);
 
         // Mock do repositório
         Contact contact = new Contact();
-        contact.setId(1L);
         contact.setName("John Doe");
+        contact.setPhone("81999999999");
+        contact.setEmail("johnDoe@gmail.com");
+        contact.setJobTitle("Tester");
+        contact.setCompany("Google");
+        contact.setAddress("123 Main St");
         Page<Contact> contactPage = new PageImpl<>(List.of(contact), pageable, 1);
         when(contactRepository.findAll(spec, pageable)).thenReturn(contactPage);
 
@@ -200,8 +235,7 @@ class ContactServiceTest {
         doReturn(expectedResponse).when(spyService).formatResponse(contactPage, sortBy, direction);
 
         // Act
-        Map<String, Object> response = spyService.getContacts(
-                token, page, size, search, company, jobTitle, sortBy, direction, allParams);
+        Map<String, Object> response = spyService.getContacts(page, size, search, company, jobTitle, sortBy, direction, allParams);
 
         // Assert
         assertEquals(expectedResponse, response);
@@ -209,9 +243,8 @@ class ContactServiceTest {
         // Verificações
         verify(spyService).validateUniqueParams(allParams);
         verify(spyService).validateSortBy(sortBy);
-        verify(jwtService).extractId(token);
         verify(spyService).buildPageable(page, size, sortBy, direction);
-        verify(spyService).buildSpecification(1L, search, company, jobTitle);
+        verify(spyService).buildSpecification(user.getId(), search, company, jobTitle);
         verify(contactRepository).findAll(spec, pageable);
         verify(spyService).formatResponse(contactPage, sortBy, direction);
     }
