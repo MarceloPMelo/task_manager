@@ -2,8 +2,8 @@ POST http://localhost:8080/auth/register
 Content-Type: application/json
 
 {
-    "name": "malu",
-    "email": "malu@gmail.com",
+    "name": "teco",
+    "email": "teco@gmail.com",
     "password": "123"
 }
 
@@ -38,7 +38,7 @@ Content-Type: application/json
 {
   "name": "Joao abreu",
   "phone": "+55 71 95555-4444",
-  "email": "joao.abreu@email.com",
+  "email": "joao.abrefu@email.com",
   "company": "Marketing Plus",
   "jobTitle": "Especialista em Marketing",
   "address": "Av. Sete de Setembro, 150 - Salvador/BA"

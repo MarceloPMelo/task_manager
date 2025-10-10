@@ -37,15 +37,13 @@ public class ContactController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createContact(
-            @CookieValue(value = "jwt", defaultValue = "") String token,
-            @Valid @RequestBody Contact contact) {
-        return ResponseEntity.ok(contactService.createContact(token, contact));
+    public ResponseEntity<Map<String, Object>> createContact(@Valid @RequestBody Contact contact) {
+        Map<String, Object> response = contactService.createContact(contact);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
     public ResponseEntity<Map<String, Object>> getContacts(
-            @CookieValue(value = "jwt", defaultValue = "") String token,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String search,
@@ -55,7 +53,7 @@ public class ContactController {
             @RequestParam(defaultValue = "asc") String direction,
             @RequestParam MultiValueMap<String, String> allParams) {
 
-        return ResponseEntity.ok(contactService.getContacts(token, page, size, search, company, jobTitle, sortBy, direction, allParams));
+        return ResponseEntity.ok(contactService.getContacts( page, size, search, company, jobTitle, sortBy, direction, allParams));
     }
 
     @DeleteMapping("/{id}")

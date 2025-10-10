@@ -13,6 +13,7 @@ import com.example.init_java.security.JwtService;
 
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MultiValueMap;
 
@@ -33,9 +34,10 @@ public class ContactService {
         this.jwtService = jwtService;
     }
 
-    public Map<String, Object> createContact(String token, @Valid Contact contact) {
+    public Map<String, Object> createContact(@Valid Contact contact) {
 
-        Long userId = jwtService.extractId(token);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         if (contactRepository.existsByEmail(contact.getEmail())) {
             throw new BadRequestException("Email já cadastrado");
         }
@@ -44,16 +46,18 @@ public class ContactService {
                 userRepository.findById(userId).orElseThrow(() -> new BadRequestException("Usuário não encontrado")));
         Contact createdContact = contactRepository.save(contact);
 
+        
         ContactDto contactDto = toDto(createdContact);
 
         Map<String, Object> res = new HashMap<>();
         res.put("message", "Contato criado com sucesso");
         res.put("contact", contactDto);
+
         return res;
     }
 
     public Map<String, Object> getContacts(
-            String token, int page, int size, String search, List<String> company,
+            int page, int size, String search, List<String> company,
             List<String> jobTitle, String sortBy, String direction, MultiValueMap<String, String> allParams) {
 
         // 1. Validação dos parâmetros de entrada
@@ -61,7 +65,7 @@ public class ContactService {
         validateSortBy(sortBy);
 
         // 2. Preparação dos dados para a consulta
-        Long userId = jwtService.extractId(token);
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Pageable pageable = buildPageable(page, size, sortBy, direction);
         Specification<Contact> spec = buildSpecification(userId, search, company, jobTitle);
 
@@ -122,6 +126,10 @@ public class ContactService {
     }
 
     // ------------------------ Métodos auxiliares ------------------------
+
+    private Long getLoggedUserId() {
+    return (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+}
 
     protected void validateUniqueParams(MultiValueMap<String, String> allParams) {
         List<String> uniqueParams = List.of("sortBy", "direction", "search");
