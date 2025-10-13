@@ -36,9 +36,9 @@ POST http://localhost:8080/contacts
 Content-Type: application/json
 
 {
-  "name": "Joao abreu",
+  "name": "Joao aeu",
   "phone": "+55 71 95555-4444",
-  "email": "joao.abrefu@email.com",
+  "email": "joao.abru@email.com",
   "company": "Marketing Plus",
   "jobTitle": "Especialista em Marketing",
   "address": "Av. Sete de Setembro, 150 - Salvador/BA"
