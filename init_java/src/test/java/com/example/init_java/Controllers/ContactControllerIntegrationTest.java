@@ -14,7 +14,6 @@ import org.springframework.boot.testcontainers.service.connection.ServiceConnect
 import org.springframework.boot.test.web.server.LocalServerPort;
 
 import org.springframework.http.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
