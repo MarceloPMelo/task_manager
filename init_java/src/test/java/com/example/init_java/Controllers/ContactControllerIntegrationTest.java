@@ -1,5 +1,6 @@
 package com.example.init_java.Controllers;
 
+import com.example.init_java.dto.CreateContactResponse;
 import com.example.init_java.model.User;
 import com.example.init_java.repository.User.UserRepository;
 import com.example.init_java.security.JwtService;
@@ -14,10 +15,10 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 
 import org.springframework.http.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,6 +45,9 @@ class ContactControllerIntegrationTest {
     private User user;
     private HttpHeaders headers;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     void setup() {
 
@@ -54,7 +58,7 @@ class ContactControllerIntegrationTest {
         user = new User();
         user.setName("teste");
         user.setEmail("teste@gmail.com");
-        user.setPassword(new BCryptPasswordEncoder().encode("1234"));
+        user.setPassword(passwordEncoder.encode("1234"));
         userRepository.save(user);
 
         // Gera JWT
@@ -79,14 +83,16 @@ class ContactControllerIntegrationTest {
                 """;
 
         HttpEntity<String> request = new HttpEntity<>(contactJson, headers);
-        ResponseEntity<String> response = restTemplate.postForEntity(
+
+        ResponseEntity<CreateContactResponse> response = restTemplate.postForEntity(
                 "http://localhost:" + port + "/contacts",
                 request,
-                String.class);
+                CreateContactResponse.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        var json = new ObjectMapper().readTree(response.getBody());
-        assertThat(json.at("/contact/name").asText()).isEqualTo("Joao abreu");
-        assertThat(json.at("/contact/userId").asLong()).isEqualTo(user.getId());
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().getMessage()).isEqualTo("Contato criado com sucesso");
+        assertThat(response.getBody().getContact().getName()).isEqualTo("Joao abreu");
+        assertThat(response.getBody().getContact().getUserId()).isEqualTo(user.getId());
     }
 }
