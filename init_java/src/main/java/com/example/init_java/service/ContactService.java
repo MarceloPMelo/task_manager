@@ -3,6 +3,7 @@ package com.example.init_java.service;
 import com.example.init_java.dto.ContactDto;
 import com.example.init_java.dto.PatchContactDto;
 import com.example.init_java.exceptions.BadRequestException;
+import com.example.init_java.exceptions.ResourceNotFoundException;
 import com.example.init_java.model.Contact;
 import com.example.init_java.repository.Contact.ContactRepository;
 import com.example.init_java.repository.Contact.ContactSpecification;
@@ -73,9 +74,16 @@ public class ContactService {
     }
 
     public Map<String, Object> deleteContact(Long id) {
+
+        Long userId = (Long) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
         Optional<Contact> optContact = contactRepository.findById(id);
         if (optContact.isEmpty()) {
-            throw new BadRequestException("Contato não encontrado");
+            throw new ResourceNotFoundException("Contato não encontrado");
+        }
+
+        if (!optContact.get().getUser().getId().equals(userId)) {
+            throw new ResourceNotFoundException("Contato não pertence a usuário");
         }
 
         contactRepository.deleteById(id);

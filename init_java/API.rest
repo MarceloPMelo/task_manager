@@ -21,7 +21,7 @@ POST http://localhost:8080/auth/login
 Content-Type: application/json
 
 {
-    "email": "malu@gmail.com",
+    "email": "teco@gmail.com",
     "password": "123"
 }
 
@@ -45,10 +45,10 @@ Content-Type: application/json
 }
 
 ###
-GET http://localhost:8080/contacts?sortBy=company&sortBy=company
+GET http://localhost:8080/contacts
 
 ###
-DELETE http://localhost:8080/contacts/18
+DELETE http://localhost:8080/contacts/9
 
 ### 
 PATCH http://localhost:8080/contacts/1
