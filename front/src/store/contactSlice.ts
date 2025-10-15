@@ -4,10 +4,12 @@ import type { Contact } from "@/types/Contact";
 import type { SearchInput } from "@/types/SearchInput";
 import { contactService } from "@/services/contactService";
 import type { ContactInput } from "@/types/ContactInput";
+import type { Filters } from "@/types/Filters";
 
 interface ContactState {
   contacts: Contact[],
   totalPages: number,
+  filters: Filters,
   loading: boolean,
   error: string | null,
 }
@@ -15,6 +17,7 @@ interface ContactState {
 const initialState: ContactState = {
   contacts: [],
   totalPages: 0,
+  filters: {companies: [], jobTitles: []},
   loading: false,
   error: null,
 };
@@ -48,6 +51,19 @@ export const addContact = createAsyncThunk(
     }
   }
 );
+
+export const fetchFilters = createAsyncThunk(
+  "contacts/fetchFilters",
+  async (_, { rejectWithValue }) => {
+    try{
+      const data = await contactService.getFilters()
+      return data;
+    } catch (err: any) {
+      console.log("Erro: " + err.message)
+      return rejectWithValue(err.message || "Erro ao acessar filtros")
+    }
+  }
+)
 
 const contactSlice = createSlice({
   name: "contacts",
@@ -92,6 +108,9 @@ const contactSlice = createSlice({
       })
       .addCase(addContact.fulfilled, (state, action : PayloadAction<Contact>) => {
         state.contacts.push(action.payload)
+      })
+      .addCase(fetchFilters.fulfilled, (state, action : PayloadAction<Filters>) => {
+        state.filters = action.payload
       })
   },
 });

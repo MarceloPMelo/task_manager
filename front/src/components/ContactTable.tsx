@@ -11,15 +11,11 @@ import {
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import type { SearchInput } from "@/types/SearchInput";
-import { fetchContacts } from "@/store/contactSlice";
+import { fetchContacts, fetchFilters } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";
 import { contactService } from "@/services/contactService";
 
-type Filters = {
-  companies: string[];
-  jobTitles: string[];
-};
 
 const sortOptions = [
   { label: "Name Asc", value: { sortBy: "name", direction: "asc" } },
@@ -39,12 +35,9 @@ export function ContactTable() {
   const dispatch = useDispatch<AppDispatch>();
   const contacts = useSelector((state: RootState) => state.contacts.contacts);
   const totalPages = useSelector((state: RootState) => state.contacts.totalPages);
+  const filterOptions = useSelector((state: RootState) => state.contacts.filters); 
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [enums, setFilters] = useState<Filters>({
-    companies: [],
-    jobTitles: [],
-  });
 
   const [searchInput, setSearchInput] = useState<SearchInput>({
     search: null,
@@ -61,11 +54,7 @@ export function ContactTable() {
  
 
   useEffect(() => {
-    const fetchFilters = async () => {
-      const filters : Filters = await contactService.getFilters();
-      setFilters({companies: filters.companies, jobTitles: filters.jobTitles});
-    };
-    fetchFilters();
+    dispatch(fetchFilters())
   }, []);
 
   const handlePrevPage = () => {
@@ -133,7 +122,7 @@ export function ContactTable() {
         />
         <FormGroup>
           <Typography variant="subtitle1" gutterBottom>Companies</Typography>
-          {enums.companies.map((company) => (
+          {filterOptions.companies.map((company) => (
             <FormControlLabel
               key={company}
               control={
@@ -149,7 +138,7 @@ export function ContactTable() {
 
         <FormGroup>
           <Typography variant="subtitle1" gutterBottom>Job Titles</Typography>
-          {enums.jobTitles.map((jobTitle) => (
+          {filterOptions.jobTitles.map((jobTitle) => (
             <FormControlLabel
               key={jobTitle}
               control={
