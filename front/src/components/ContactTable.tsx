@@ -9,12 +9,13 @@ import {
   FormControl, InputLabel, Select, MenuItem
 } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import type { SearchInput } from "@/types/SearchInput";
-import { fetchContacts, fetchFilters } from "@/store/contactSlice";
+import { deleteContact, fetchContacts, fetchFilters } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";
-import { contactService } from "@/services/contactService";
+import { number } from "yup";
+import { prepareDataForValidation } from "formik";
 
 
 const sortOptions = [
@@ -38,6 +39,7 @@ export function ContactTable() {
   const filterOptions = useSelector((state: RootState) => state.contacts.filters); 
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [selectedContactsId, setSelectedContactsId] = useState<number[]>([])
 
   const [searchInput, setSearchInput] = useState<SearchInput>({
     search: null,
@@ -65,6 +67,14 @@ export function ContactTable() {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
   };
 
+  const handleDeleteManyContacts = () => {
+    selectedContactsId.forEach(id => {
+      dispatch(deleteContact(id))
+    });
+    setSelectedContactsId([]);
+    
+  }
+
 
   const handleCompany = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -86,6 +96,17 @@ export function ContactTable() {
         ? [...(prev.jobTitle ?? []), value]
         : (prev.jobTitle ?? []).filter((j) => j !== value),
     }));
+  };
+
+  const handleSelectContact = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value: number = Number(e.target.value);
+    const checked = e.target.checked;
+
+    setSelectedContactsId((prev) =>
+      checked
+        ? [...prev, value]
+        : prev.filter((id) => id !== value)
+    );
   };
 
   if (contacts.length === 0) {
@@ -179,7 +200,7 @@ export function ContactTable() {
           </FormControl>
 
         </FormGroup>
-        <Button type="submit" variant="contained">
+        <Button onClick={handleDeleteManyContacts} type="submit" variant="contained">
           Buscar
         </Button>
       </Box>
@@ -209,7 +230,7 @@ export function ContactTable() {
                     },
                   }}
                 >
-                  <TableCell> <Checkbox /></TableCell>
+                  <TableCell> <Checkbox value={contact.id} checked={(selectedContactsId.includes(Number(contact.id)))} onChange={handleSelectContact} /></TableCell>
                   <TableCell align="left">{contact.name}</TableCell>
                   <TableCell align="left">{contact.phone}</TableCell>
                   <TableCell align="left">{contact.email}</TableCell>
@@ -221,6 +242,21 @@ export function ContactTable() {
             </TableBody>
           </Table>
         </TableContainer>
+
+        {/*Botão de deletar selecionados*/}
+        <Box display="flex" flexDirection="column" justifyContent="flex-start" sx={{backgroundColor: "transparent"}}>
+              <h1>Ids selecionados</h1>
+              <ul>
+                {selectedContactsId.map(id => (
+                  <li key={id}>{id}</li>
+                ))}
+              </ul>
+
+          <Button onClick={handleDeleteManyContacts} color="error" variant="contained" sx={{ backgroundColor: "#ffeaea", color: "#d32f2f", '&:hover': { backgroundColor: "#ffd6d6" }, width: "153px" }}>
+            Apagar
+          </Button>
+
+        </Box>
 
         {/* Paginação */}
         {contacts.length > 0 && (

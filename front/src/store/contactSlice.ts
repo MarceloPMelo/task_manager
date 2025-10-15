@@ -65,6 +65,20 @@ export const fetchFilters = createAsyncThunk(
   }
 )
 
+export const deleteContact = createAsyncThunk(
+  "contacts/deleteContact",
+  async (contactId: Number, {rejectWithValue}) => {
+
+    try{
+      const data = await contactService.removeContact(contactId)
+      return data.contactId;
+    } catch (err: any) {
+      console.log("Erro: " + err.message)
+      return rejectWithValue(err.message || "Erro ao deletar contato co id: " + contactId)
+    }
+  }
+)
+
 const contactSlice = createSlice({
   name: "contacts",
   initialState,
@@ -81,7 +95,7 @@ const contactSlice = createSlice({
         state.contacts[index] = action.payload;
       }
     },
-    deleteContact: (state, action: PayloadAction<string>) => {
+    removeContact: (state, action: PayloadAction<Number>) => {
       state.contacts = state.contacts.filter(c => c.id !== action.payload);
     },
   },
@@ -112,11 +126,14 @@ const contactSlice = createSlice({
       .addCase(fetchFilters.fulfilled, (state, action : PayloadAction<Filters>) => {
         state.filters = action.payload
       })
+      .addCase(deleteContact.fulfilled, (state, action : PayloadAction<Number>) => {
+        state.contacts = state.contacts.filter((c) => c.id !== action.payload)
+      })
   },
 });
 
 
 
 
-export const { setContacts, createContact, updateContact, deleteContact } = contactSlice.actions;
+export const { setContacts, createContact, updateContact, removeContact } = contactSlice.actions;
 export default contactSlice.reducer;

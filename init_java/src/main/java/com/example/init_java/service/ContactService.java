@@ -89,6 +89,7 @@ public class ContactService {
         contactRepository.deleteById(id);
         Map<String, Object> res = new HashMap<>();
         res.put("message", "Contato deletado com sucesso");
+        res.put("contactId", id);
         return res;
     }
 

@@ -35,7 +35,7 @@ export const contactService = {
         return res.data; // { companies, jobTitles }
     },
 
-    async removeContact(id: string) {
+    async removeContact(id: Number): Promise<{message: string, contactId: number}> {
         const res = await axios.delete(`${BASE_URL}/${id}`, {
             withCredentials: true,
         });
