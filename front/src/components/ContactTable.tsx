@@ -6,7 +6,13 @@ import {
   TableRow, Box, IconButton,
   Typography, TextField, Button,
   FormGroup, FormControlLabel,
-  FormControl, InputLabel, Select, MenuItem
+  FormControl, InputLabel, Select, MenuItem,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Modal
 } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -14,8 +20,7 @@ import type { SearchInput } from "@/types/SearchInput";
 import { deleteContact, fetchContacts, fetchFilters } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";
-import { number } from "yup";
-import { prepareDataForValidation } from "formik";
+import EditPopUpForm from "./EditPopUpForm"
 
 
 const sortOptions = [
@@ -36,10 +41,12 @@ export function ContactTable() {
   const dispatch = useDispatch<AppDispatch>();
   const contacts = useSelector((state: RootState) => state.contacts.contacts);
   const totalPages = useSelector((state: RootState) => state.contacts.totalPages);
-  const filterOptions = useSelector((state: RootState) => state.contacts.filters); 
+  const filterOptions = useSelector((state: RootState) => state.contacts.filters);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedContactsId, setSelectedContactsId] = useState<number[]>([])
+  const [deletePopUp, setDeletePopUp] = useState(false);
+  const [editPopUp, setEditPopUp] = useState(false)
 
   const [searchInput, setSearchInput] = useState<SearchInput>({
     search: null,
@@ -50,10 +57,10 @@ export function ContactTable() {
   });
 
   useEffect(() => {
-    dispatch(fetchContacts({page: currentPage, filters: searchInput}));
+    dispatch(fetchContacts({ page: currentPage, filters: searchInput }));
   }, [currentPage]);
 
- 
+
 
   useEffect(() => {
     dispatch(fetchFilters())
@@ -72,9 +79,8 @@ export function ContactTable() {
       dispatch(deleteContact(id))
     });
     setSelectedContactsId([]);
-    
+    setDeletePopUp(false)
   }
-
 
   const handleCompany = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -109,6 +115,23 @@ export function ContactTable() {
     );
   };
 
+
+  const handleOpenDeletePopUp = () => {
+    setDeletePopUp(true);
+  };
+
+  const handleCloseDeletePopUp = () => {
+    setDeletePopUp(false);
+  };
+
+  const handleOpenEditPopUp = () => {
+    setEditPopUp(true);
+  };
+
+  const handleCloseEditPopUp = () => {
+    setEditPopUp(false);
+  };
+
   if (contacts.length === 0) {
     return (
       <div className="text-center py-12 text-muted-foreground">
@@ -130,7 +153,7 @@ export function ContactTable() {
         component="form"
         onSubmit={(e) => {
           e.preventDefault();
-          dispatch(fetchContacts({page: 1, filters: searchInput}));
+          dispatch(fetchContacts({ page: 1, filters: searchInput }));
           setCurrentPage(1);
         }}
       >
@@ -200,7 +223,7 @@ export function ContactTable() {
           </FormControl>
 
         </FormGroup>
-        <Button onClick={handleDeleteManyContacts} type="submit" variant="contained">
+        <Button type="submit" variant="contained">
           Buscar
         </Button>
       </Box>
@@ -244,19 +267,49 @@ export function ContactTable() {
         </TableContainer>
 
         {/*Botão de deletar selecionados*/}
-        <Box display="flex" flexDirection="column" justifyContent="flex-start" sx={{backgroundColor: "transparent"}}>
-              <h1>Ids selecionados</h1>
-              <ul>
-                {selectedContactsId.map(id => (
-                  <li key={id}>{id}</li>
-                ))}
-              </ul>
+        {selectedContactsId.length !== 0 && (<Box display="flex" flexDirection="row" justifyContent="flex-start" sx={{ backgroundColor: "transparent" }}>
+          <h1>Ids selecionados</h1>
+          <ul>
+            {selectedContactsId.map(id => (
+              <li key={id}>{id}</li>
+            ))}
+          </ul>
+          {selectedContactsId.length === 1 && (<Button onClick={handleOpenEditPopUp}>
+            Editar
+          </Button>)}
 
-          <Button onClick={handleDeleteManyContacts} color="error" variant="contained" sx={{ backgroundColor: "#ffeaea", color: "#d32f2f", '&:hover': { backgroundColor: "#ffd6d6" }, width: "153px" }}>
+          <Button onClick={handleOpenDeletePopUp} color="error" variant="contained" sx={{ backgroundColor: "#ffeaea", color: "#d32f2f", '&:hover': { backgroundColor: "#ffd6d6" }, width: "153px" }}>
             Apagar
           </Button>
 
-        </Box>
+        </Box>)}
+
+        <Dialog
+          open={deletePopUp}
+          onClose={handleCloseDeletePopUp}
+        >
+          <DialogTitle>{"Confirmação"}</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Deseja realmente apagar os {selectedContactsId.length} contatos selecionados?
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDeletePopUp} color="secondary">
+              Cancelar
+            </Button>
+            <Button onClick={handleDeleteManyContacts} autoFocus sx={{ backgroundColor: "#ffeaea", color: "#d32f2f", '&:hover': { backgroundColor: "#ffd6d6" }, width: "153px" }} >
+              Apagar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        <Dialog open={editPopUp} onClose={handleCloseEditPopUp}>
+        <EditPopUpForm
+          contactId={selectedContactsId[0]}
+          onClose={handleCloseEditPopUp}
+        />
+      </Dialog>
 
         {/* Paginação */}
         {contacts.length > 0 && (
