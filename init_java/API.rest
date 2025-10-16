@@ -51,7 +51,7 @@ GET http://localhost:8080/contacts
 DELETE http://localhost:8080/contacts/9
 
 ### 
-PATCH http://localhost:8080/contacts/1
+PATCH http://localhost:8080/contacts/2
 Content-Type: application/json
 
 {

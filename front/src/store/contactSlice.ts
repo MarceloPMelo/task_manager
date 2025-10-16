@@ -79,6 +79,24 @@ export const deleteContact = createAsyncThunk(
   }
 )
 
+export const updateContact = createAsyncThunk(
+  "contacts/updateContact",
+  async (
+    { contactId, updateContent }: { contactId: Number; updateContent: ContactInput },
+    { rejectWithValue }
+  ) => {
+    try {
+      const data = await contactService.updateContact(contactId, updateContent);
+      return data;
+    } catch (err: any) {
+      console.log("Erro: " + err.message);
+      return rejectWithValue(
+        err.message || `Erro ao atualizar contato com id: ${contactId}`
+      );
+    }
+  }
+);
+
 const contactSlice = createSlice({
   name: "contacts",
   initialState,
@@ -89,7 +107,7 @@ const contactSlice = createSlice({
     createContact: (state, action: PayloadAction<Contact>) => {
       state.contacts.push(action.payload);
     },
-    updateContact: (state, action: PayloadAction<Contact>) => {
+    editContact: (state, action: PayloadAction<Contact>) => {
       const index = state.contacts.findIndex(c => c.id === action.payload.id);
       if (index !== -1) {
         state.contacts[index] = action.payload;
@@ -129,11 +147,17 @@ const contactSlice = createSlice({
       .addCase(deleteContact.fulfilled, (state, action : PayloadAction<Number>) => {
         state.contacts = state.contacts.filter((c) => c.id !== action.payload)
       })
+      .addCase(updateContact.fulfilled, (state, action : PayloadAction<Contact>) => {
+        const index = state.contacts.findIndex(c => c.id === action.payload.id);
+      if (index !== -1) {
+        state.contacts[index] = action.payload;
+      }
+      })
   },
 });
 
 
 
 
-export const { setContacts, createContact, updateContact, removeContact } = contactSlice.actions;
+export const { setContacts, createContact, editContact, removeContact } = contactSlice.actions;
 export default contactSlice.reducer;

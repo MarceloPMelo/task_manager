@@ -11,8 +11,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogContentText,
-  DialogActions,
-  Modal
+  DialogActions
 } from "@mui/material";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -20,7 +19,8 @@ import type { SearchInput } from "@/types/SearchInput";
 import { deleteContact, fetchContacts, fetchFilters } from "@/store/contactSlice";
 import { type AppDispatch, type RootState } from "@/store"
 import { useDispatch, useSelector } from "react-redux";
-import EditPopUpForm from "./EditPopUpForm"
+
+import { EditPopUpForm } from "./EditPopUpForm"
 
 
 const sortOptions = [
@@ -304,12 +304,12 @@ export function ContactTable() {
           </DialogActions>
         </Dialog>
 
-        <Dialog open={editPopUp} onClose={handleCloseEditPopUp}>
         <EditPopUpForm
           contactId={selectedContactsId[0]}
           onClose={handleCloseEditPopUp}
+          open={editPopUp}
         />
-      </Dialog>
+      
 
         {/* Paginação */}
         {contacts.length > 0 && (

@@ -51,8 +51,8 @@ export const contactService = {
         }
     },
 
-    async updateContact(id: string, patchData: patchContact): Promise<Contact> {
-        const res = await axios.put(
+    async updateContact(id: Number, patchData: ContactInput): Promise<Contact> {
+        const res = await axios.patch(
             `${BASE_URL}/${id}`,
             patchData,
             { withCredentials: true }
