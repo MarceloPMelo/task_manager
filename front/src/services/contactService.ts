@@ -2,7 +2,6 @@ import axios from "axios";
 import type { Contact } from "@/types/Contact";
 import type { SearchInput } from "@/types/SearchInput";
 import type { ContactInput } from "@/types/ContactInput";
-import type { patchContact } from "@/types/patchContact";
 
 const BASE_URL = "http://localhost:8080/contacts";
 const pageSize = 10;
@@ -22,7 +21,7 @@ export const contactService = {
                 },
                 withCredentials: true,
             });
-            return res.data; // { contacts, totalPages }
+            return res.data; 
         } catch (error: any) {
             throw error.response?.data || { message: "Erro desconhecido", status: 500 };
         }
@@ -32,7 +31,7 @@ export const contactService = {
         const res = await axios.get(`${BASE_URL}/filters`, {
             withCredentials: true,
         });
-        return res.data; // { companies, jobTitles }
+        return res.data; 
     },
 
     async removeContact(id: Number): Promise<{message: string, contactId: number}> {
