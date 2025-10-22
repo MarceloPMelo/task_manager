@@ -1,4 +1,4 @@
-package com.example.init_java.Controllers;
+package com.example.init_java.controller;
 
 import com.example.init_java.dto.CreateContactResponse;
 import com.example.init_java.dto.PaginatedContactsResponse;
