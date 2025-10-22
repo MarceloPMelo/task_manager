@@ -17,6 +17,17 @@ export const userService = {
         } catch (error: any) {
             throw error.response?.data || { message: "Erro desconhecido", status: 500 };
         }
+    },
+
+    async validate() {
+        try {
+            const response = await axios.get("http://localhost:8080/auth/validate", {
+                withCredentials: true,
+            });
+            return response;
+        } catch (error: any) {
+            throw error.response?.data || { message: "Erro desconhecido", status: 500 };
+        }
     }
 
 }

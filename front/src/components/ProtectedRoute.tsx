@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import axios from "axios";
 import type { ReactNode } from 'react'
-import { useDispatch, useSelector } from "react-redux";
-import { type AppDispatch, type RootState } from "@/store"
+import { userService } from "@/services/userService";
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -11,36 +9,20 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const dispatch = useDispatch<AppDispatch>();
-  const user = useSelector((state: RootState) => state.user);
-
   useEffect(() => {
     const validateToken = async () => {
-      try {
-        const response = await axios.get("http://localhost:8080/auth/validate", {
-          withCredentials: true, // necessário para enviar cookies HttpOnly
-        });
-
-        const data = await response.data;
-        console.log("Dados recebidos da validação:", data);
+      const response = await userService.validate();
+      console.log("Dados recebidos da validação:", response.data);
 
         if (response.status === 200) {
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
         }
-      } catch (error) {
-        setIsAuthenticated(false);
-      }
+      
     };
     validateToken();
   }, []);
-
-  useEffect(() => {
-    if (user) {
-      console.log("User atualizado no contexto (ProtectedRoute):", user);
-    }
-  }, [user]);
 
   // Enquanto valida → mostrar loading (ou spinner)
   if (isAuthenticated === null) {
@@ -49,10 +31,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   // Se não autenticado → manda pro login
   if (!isAuthenticated) {
+    console.log("Usuário não autenticado (ProtectedRoute)");
     return <Navigate to="/login" replace />;
   }
 
   // Se autenticado → renderiza o componente protegido
+  console.log("Usuário autenticado (ProtectedRoute)");
   return <>{children}</>;
 };
 

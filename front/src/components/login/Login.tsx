@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react'
 import './Login.css'
-import axios from "axios";
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
 import { login } from '../../store/userSlice';
@@ -13,31 +12,37 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false)
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const navigate = useNavigate()
-  
+
   const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
-  
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setFeedback(null);
+    setIsLoading(true);
 
-    const result = await dispatch(login({ email: email, password: password }));
+    const result = await dispatch(login({ email, password }));
 
     if (login.fulfilled.match(result)) {
       navigate('/');
     } else {
-      setFeedback({ type: 'error', message: 'Falha ao fazer login' });
+      const errorMessage =
+        typeof result.payload === "string"
+          ? result.payload 
+          : "Falha ao fazer login";
+      setFeedback({ type: "error", message: errorMessage });
     }
-  }
- 
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     if (!feedback) return
     const t = setTimeout(() => setFeedback(null), 3500)
     return () => clearTimeout(t)
   }, [feedback])
 
-  
+
   useEffect(() => {
     if (user) {
       console.log("User atualizado no contexto(Login):", user);
@@ -62,7 +67,7 @@ const Login = () => {
           <h1 className="login-title">Bem-vindo de volta</h1>
           <p className="login-subtitle">Faça login em sua conta</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <label htmlFor="email" className="input-label">
@@ -78,7 +83,7 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <div className="input-group">
             <label htmlFor="password" className="input-label">
               Senha
@@ -93,7 +98,7 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <div className="form-options">
             <label className="checkbox-container">
               <input type="checkbox" />
@@ -104,9 +109,9 @@ const Login = () => {
               Esqueceu a senha?
             </a>
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className={`login-button ${isLoading ? 'loading' : ''}`}
             disabled={isLoading}
           >
@@ -117,10 +122,10 @@ const Login = () => {
             )}
           </button>
         </form>
-        
+
         <div className="login-footer">
           <p>
-            Não tem uma conta? 
+            Não tem uma conta?
             <a href="/register" className="signup-link"> Cadastre-se</a>
           </p>
         </div>
