@@ -1,8 +1,5 @@
 import { User as UserIcon, LogOut, CheckSquare } from "lucide-react";
-import axios from "axios";
-import { setUser } from "../store/userSlice";
 import { useNavigate } from "react-router-dom";
-
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
@@ -16,11 +13,12 @@ import Divider from "@mui/material/Divider";
 import { useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import { useDispatch, useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { logout } from '../store/userSlice';
+import type { RootState, AppDispatch } from '@/store';
 
 export function Header() {
   const user = useSelector((state: RootState) => state.user);
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const theme = useTheme(); // pega as cores do tema
 
@@ -34,20 +32,17 @@ export function Header() {
     setAnchorEl(null);
   };
 
-  const handleLogout = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      await axios.post(
-        "http://localhost:8080/auth/logout",
-        {},
-        { withCredentials: true }
-      );
-      dispatch(setUser({ name: null, email: null }));
-      navigate("/login");
-    } catch (err) {
-      console.error("Erro no logout:", err);
-    }
-  };
+  const handleLogout = async () => {
+  const result = await dispatch(logout());
+
+  if (logout.fulfilled.match(result)) {
+    console.log(result.payload?.message || "Logout realizado com sucesso");
+    navigate("/login");
+  } else {
+    // erro
+    console.error("Erro ao fazer logout:", result.payload);
+  }
+};
 
   return (
     <AppBar position="sticky" color="transparent" elevation={0}>

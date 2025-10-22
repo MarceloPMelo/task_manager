@@ -1,4 +1,4 @@
-import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice, isRejectedWithValue } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { userService } from "@/services/userService";
 
@@ -28,6 +28,18 @@ export const login = createAsyncThunk(
   }
 )
 
+export const logout = createAsyncThunk(
+  "users/logout",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await userService.logout();
+      return { success: true, message: response.data?.message || "Logout realizado com sucesso" };
+    } catch (err: any) {
+      return rejectWithValue(err.message || "Erro ao fazer logout");
+    }
+  }
+);
+
 const userSlice = createSlice({
   name: 'user',
   initialState,
@@ -39,10 +51,14 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.fulfilled, (state, action : PayloadAction<User>) => {
+      .addCase(login.fulfilled, (state, action: PayloadAction<User>) => {
         state.name = action.payload.name;
         state.email = action.payload.email;
       })
+      .addCase(logout.fulfilled, (state) => {
+        state.name = null;
+        state.email = null;
+      });
   }
 });
 

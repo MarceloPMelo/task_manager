@@ -19,9 +19,24 @@ export const userService = {
         }
     },
 
+    async logout () {
+
+        try {
+             const response = await axios.post(
+                BASE_URL + "/logout",
+                {},
+                { withCredentials: true }
+            );
+            return response
+            
+        } catch (error: any) {
+            throw error.response?.data || { message: "Erro desconhecido", status: 500 };
+        }
+    },
+
     async validate() {
         try {
-            const response = await axios.get("http://localhost:8080/auth/validate", {
+            const response = await axios.get(BASE_URL + "/validate", {
                 withCredentials: true,
             });
             return response;
