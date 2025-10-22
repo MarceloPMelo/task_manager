@@ -3,8 +3,8 @@ import './Login.css'
 import axios from "axios";
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from "react-redux";
-import { setUser } from '../../store/userSlice';
-import type { RootState } from '@/store';
+import { login } from '../../store/userSlice';
+import type { RootState, AppDispatch } from '@/store';
 
 
 const Login = () => {
@@ -14,56 +14,30 @@ const Login = () => {
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const navigate = useNavigate()
   
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const user = useSelector((state: RootState) => state.user);
   
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setFeedback(null);
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+    const result = await dispatch(login({ email: email, password: password }));
 
-      const data = response.data;
-      console.log("Login realizado:", data);
-      console.log("User antes(Login): ", user);
-
-      // Atualiza o contexto
-      dispatch(setUser({ name: data.name, email: data.email }));
-
-      // Feedback de sucesso
-      setFeedback({ type: 'success', message: data.message || 'Login realizado com sucesso' });
-
-      // Redireciona para Home
+    if (login.fulfilled.match(result)) {
       navigate('/');
-
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Erro no login:", error.response.status, error.response.data);
-        setFeedback({ type: 'error', message: error.response.data?.message || 'Falha no login' });
-      } else {
-        console.error("Erro:", error.message);
-        setFeedback({ type: 'error', message: 'Erro de rede. Tente novamente.' });
-      }
-    } finally {
-      setIsLoading(false);
+    } else {
+      setFeedback({ type: 'error', message: 'Falha ao fazer login' });
     }
-  };
-
-  // Ocultar toast automaticamente após alguns segundos
+  }
+ 
   useEffect(() => {
     if (!feedback) return
     const t = setTimeout(() => setFeedback(null), 3500)
     return () => clearTimeout(t)
   }, [feedback])
 
-  // 👀 Monitorar mudanças no user
+  
   useEffect(() => {
     if (user) {
       console.log("User atualizado no contexto(Login):", user);
