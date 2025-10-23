@@ -3,7 +3,7 @@ import { DialogTitle, DialogContent, DialogActions, TextField, Button, Dialog } 
 import type { AppDispatch, RootState } from '@/store';
 import { useDispatch, useSelector } from "react-redux";
 import type { ContactInput } from "../types/ContactInput";
-import { updateContact } from '@/store/contactSlice';
+import { updateContact, setSelectedContactsId } from '@/store/contactSlice';
 
 type EditPopUpFormProps = {
   contactId: number;
@@ -47,6 +47,7 @@ export function EditPopUpForm({ contactId, open, onClose }: EditPopUpFormProps) 
     console.log(contactId);
     console.log(formData);
     dispatch(updateContact({ contactId: contactId, updateContent: formData }));
+    dispatch(setSelectedContactsId([]));
     onClose();
   };
 

@@ -24,18 +24,18 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     validateToken();
   }, []);
 
-  // Enquanto valida → mostrar loading (ou spinner)
+  // Enquanto valida mostra loading 
   if (isAuthenticated === null) {
     return <div>Carregando...</div>;
   }
 
-  // Se não autenticado → manda pro login
+  // Se não autenticado, manda pro login
   if (!isAuthenticated) {
     console.log("Usuário não autenticado (ProtectedRoute)");
     return <Navigate to="/login" replace />;
   }
 
-  // Se autenticado → renderiza o componente protegido
+  // Se autenticado, renderiza o componente protegido
   console.log("Usuário autenticado (ProtectedRoute)");
   return <>{children}</>;
 };

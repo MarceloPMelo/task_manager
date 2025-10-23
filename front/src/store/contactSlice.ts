@@ -10,16 +10,15 @@ interface ContactState {
   contacts: Contact[],
   totalPages: number,
   filters: Filters,
-  loading: boolean,
-  error: string | null,
+  selectedContactsId: number[]
 }
 
 const initialState: ContactState = {
   contacts: [],
   totalPages: 0,
   filters: {companies: [], jobTitles: []},
-  loading: false,
-  error: null,
+  selectedContactsId: []
+
 };
 
 // Async thunk to fetch contacts with pagination and filters
@@ -116,28 +115,21 @@ const contactSlice = createSlice({
     removeContact: (state, action: PayloadAction<Number>) => {
       state.contacts = state.contacts.filter(c => c.id !== action.payload);
     },
+    setSelectedContactsId: (state, action: PayloadAction<number[]>) => {
+      state.selectedContactsId = action.payload;
+    },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchContacts.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
       .addCase(
         fetchContacts.fulfilled,
         (
           state,
           action: PayloadAction<{ contacts: Contact[]; totalPages: number }>
         ) => {
-          state.loading = false;
           state.contacts = action.payload.contacts;
           state.totalPages = action.payload.totalPages;
-        }
-      )
-      .addCase(fetchContacts.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
+        })
       .addCase(addContact.fulfilled, (state, action : PayloadAction<Contact>) => {
         state.contacts.push(action.payload)
       })
@@ -156,8 +148,5 @@ const contactSlice = createSlice({
   },
 });
 
-
-
-
-export const { setContacts, createContact, editContact, removeContact } = contactSlice.actions;
+export const { setContacts, createContact, editContact, removeContact, setSelectedContactsId } = contactSlice.actions;
 export default contactSlice.reducer;
