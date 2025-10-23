@@ -33,16 +33,15 @@ export function Header() {
   };
 
   const handleLogout = async () => {
-  const result = await dispatch(logout());
+    const result = await dispatch(logout());
 
-  if (logout.fulfilled.match(result)) {
-    console.log(result.payload?.message || "Logout realizado com sucesso");
-    navigate("/login");
-  } else {
-    // erro
-    console.error("Erro ao fazer logout:", result.payload);
-  }
-};
+    if (logout.fulfilled.match(result)) {
+      console.log(result.payload?.message || "Logout realizado com sucesso");
+      navigate("/login");
+    } else {
+      console.error("Erro ao fazer logout:", result.payload);
+    }
+  };
 
   return (
     <AppBar position="sticky" color="transparent" elevation={0}>
