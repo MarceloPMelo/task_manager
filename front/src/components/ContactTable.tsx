@@ -153,7 +153,9 @@ export function ContactTable() {
           setCurrentPage(1);
         }}
       >
-        <h1>Filtros de Busca</h1>
+        <Typography variant="h5" fontWeight="bold" color="text.primary">
+          Filtros de Busca
+        </Typography>
         <TextField
           label="Nome"
           name="nome"
