@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import './Register.css'
-import axios from "axios";
+import { userService } from '@/services/userService';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -62,40 +62,25 @@ const Register = () => {
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) {
-      return
+    if (!validateForm()) return;
+
+    setIsLoading(true);
+
+    const result = await userService.register(
+      formData.name,
+      formData.email,
+      formData.password
+    );
+    setIsLoading(false);
+
+    if (result.success) {
+      console.log(result.data);
+    } else {
+      console.error(result.data);
     }
-
-    setIsLoading(true)
-
-    try {
-      console.log('Register attempt:', formData)
-
-      const response = await axios.post(
-        "http://localhost:8080/auth/register",
-        {
-          name: formData.name,
-          email: formData.email,
-          password: formData.password
-        }
-      );
-      const data = response.data
-      console.log("Login realizado", data)
-
-
-
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Erro no cadastro:", error.response.status, error.response.data);
-      } else {
-        console.error("Erro:", error.message);
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  };
 
   return (
     <div className="register-container">

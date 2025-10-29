@@ -1,64 +1,48 @@
 import React, { useState, useEffect } from 'react'
 import './Login.css'
-import axios from "axios";
-import { useUser } from '../../context/UserContext';
 import { useNavigate } from 'react-router-dom'
+import { useDispatch, useSelector } from "react-redux";
+import { login } from '../../store/userSlice';
+import type { RootState, AppDispatch } from '@/store';
 
 
 const Login = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const { setUser, user } = useUser();
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error', message: string } | null>(null)
   const navigate = useNavigate()
 
+  const dispatch = useDispatch<AppDispatch>();
+  const user = useSelector((state: RootState) => state.user);
+
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setFeedback(null);
+    setIsLoading(true);
 
-    try {
-      const response = await axios.post(
-        "http://localhost:8080/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+    const result = await dispatch(login({ email, password }));
 
-      const data = response.data;
-      console.log("Login realizado:", data);
-      console.log("User antes(Login): ", user);
-
-      // Atualiza o contexto
-      setUser({ name: data.name, email: data.email });
-
-      // Feedback de sucesso
-      setFeedback({ type: 'success', message: data.message || 'Login realizado com sucesso' });
-
-      // Redireciona para Home
+    if (login.fulfilled.match(result)) {
       navigate('/');
-
-    } catch (error: any) {
-      if (error.response) {
-        console.error("Erro no login:", error.response.status, error.response.data);
-        setFeedback({ type: 'error', message: error.response.data?.message || 'Falha no login' });
-      } else {
-        console.error("Erro:", error.message);
-        setFeedback({ type: 'error', message: 'Erro de rede. Tente novamente.' });
-      }
-    } finally {
-      setIsLoading(false);
+    } else {
+      const errorMessage =
+        typeof result.payload === "string"
+          ? result.payload 
+          : "Falha ao fazer login";
+      setFeedback({ type: "error", message: errorMessage });
     }
+    setIsLoading(false);
   };
 
-  // Ocultar toast automaticamente após alguns segundos
   useEffect(() => {
     if (!feedback) return
     const t = setTimeout(() => setFeedback(null), 3500)
     return () => clearTimeout(t)
   }, [feedback])
 
-  // 👀 Monitorar mudanças no user
+
   useEffect(() => {
     if (user) {
       console.log("User atualizado no contexto(Login):", user);
@@ -83,7 +67,7 @@ const Login = () => {
           <h1 className="login-title">Bem-vindo de volta</h1>
           <p className="login-subtitle">Faça login em sua conta</p>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="login-form">
           <div className="input-group">
             <label htmlFor="email" className="input-label">
@@ -99,7 +83,7 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <div className="input-group">
             <label htmlFor="password" className="input-label">
               Senha
@@ -114,7 +98,7 @@ const Login = () => {
               required
             />
           </div>
-          
+
           <div className="form-options">
             <label className="checkbox-container">
               <input type="checkbox" />
@@ -125,9 +109,9 @@ const Login = () => {
               Esqueceu a senha?
             </a>
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className={`login-button ${isLoading ? 'loading' : ''}`}
             disabled={isLoading}
           >
@@ -138,10 +122,10 @@ const Login = () => {
             )}
           </button>
         </form>
-        
+
         <div className="login-footer">
           <p>
-            Não tem uma conta? 
+            Não tem uma conta?
             <a href="/register" className="signup-link"> Cadastre-se</a>
           </p>
         </div>
